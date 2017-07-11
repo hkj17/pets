@@ -19,7 +19,7 @@ public class AdminService {
 	public boolean insertAdmin(String userName, String userPasswd, int authority, String schoolId) {
 		//不重复添加管理员
 		Admin admin = adminDao.getAdminByUserName(userName);
-		if(admin!=null) {
+		if(admin==null) {
 			return adminDao.insertAdmin(userName, userPasswd, authority, schoolId);
 		}else {
 			return false;

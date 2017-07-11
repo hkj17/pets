@@ -3,13 +3,12 @@
 <%@ page session="false" %>
 <html>
 <head>
-	<title>Home</title>
+	<title>Login</title>
 </head>
 <body>
 <h1>
-	Hello world!  
+	Success! 
 </h1>
 
-<P>  已刪除用戶  ${isAdded}. </P>
 </body>
 </html>
