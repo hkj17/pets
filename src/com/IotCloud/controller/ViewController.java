@@ -1,12 +1,13 @@
 package com.IotCloud.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.IotCloud.dao.AdminDao;
 import com.IotCloud.service.AdminService;
@@ -21,13 +22,16 @@ public class ViewController {
 	AdminService adminService;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
-	public String view(HttpServletRequest request, Model model) {
+	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		// String path = request.getParameter("path") + "";
 		// ModelAndView mav = new ModelAndView();
 		// Admin admin = adminDao.getAdminByUserName("root");
-
-		model.addAttribute("isDeleted", adminService.insertAdmin("admin1", "admin1", 3, null));
+		boolean state = adminService.insertAdmin("admin1", "admin1", 3, null);
+		ModelAndView modelAndView = new ModelAndView("index");
+		//ModelAndView.addObject("isAdded", state);
+		modelAndView.addObject("isAdded", state);
+		return modelAndView;
 		// mav.setViewName(path);
-		return "index";
+		//return "index";
 	}
 }

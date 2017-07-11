@@ -10,6 +10,6 @@
 	Hello world!  
 </h1>
 
-<P>  已刪除用戶  ${isDeleted}. </P>
+<P>  已刪除用戶  ${isAdded}. </P>
 </body>
 </html>

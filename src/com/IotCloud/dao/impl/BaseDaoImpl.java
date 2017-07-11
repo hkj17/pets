@@ -18,8 +18,6 @@ public class BaseDaoImpl<T> implements BaseDao<T> {
 	
 	@Autowired
 	private SessionFactory sessionFactory;
-	
-	private static final int batchSize = 10;
 
 	private Session getSession() {
 		return sessionFactory.getCurrentSession();
