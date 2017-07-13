@@ -28,9 +28,12 @@ public class Admin implements Serializable {
 
 	@Column(name = "authority")
 	private int authority;
-
-	@Column(name = "school_id")
-	private String schoolId;
+	
+	@Column(name = "org_name")
+	private String orgName;
+	
+	@Column(name = "area_code")
+	private String areaCode;
 
 	public String getAdminId() {
 		return adminId;
@@ -64,12 +67,20 @@ public class Admin implements Serializable {
 		this.authority = authority;
 	}
 
-	public String getSchoolId() {
-		return schoolId;
+	public String getOrgName() {
+		return orgName;
 	}
 
-	public void setSchoolId(String schoolId) {
-		this.schoolId = schoolId;
+	public void setOrgName(String orgName) {
+		this.orgName = orgName;
+	}
+	
+	public String getAreaCode() {
+		return areaCode;
+	}
+	
+	public void setAreaCode(String areaCode) {
+		this.areaCode = areaCode;
 	}
 
 }

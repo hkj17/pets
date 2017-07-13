@@ -1,5 +1,7 @@
 package com.IotCloud.dao;
 
+import java.util.List;
+
 import com.IotCloud.model.Admin;
 
 /**
@@ -9,6 +11,8 @@ import com.IotCloud.model.Admin;
  */
 public interface AdminDao {
 	public Admin getAdminByUserName(String userName);
-	public boolean insertAdmin(String userName, String userPasswd, int authority, String schoolId);
+	public boolean insertAdmin(String userName, String userPasswd, int authority, String orgName, String areaCode);
 	public boolean deleteAdmin(String userName);
+	public List<Admin> getAdminList();
+	public int updatePassword(String userName, String oldPasswd, String newPasswd);
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.IotCloud.dao.BaseDao;
+import com.IotCloud.model.Admin;
 import com.IotCloud.util.CommonUtil;
 
 @Repository("baseDao")
@@ -67,5 +68,23 @@ public class BaseDaoImpl<T> implements BaseDao<T> {
 			query.setParameter(i, objects[i]);
 		}
 		query.executeUpdate();		
+	}
+
+	@Override
+	public void add(T t){
+		getSession().persist(t);
+		getSession().flush();
+	}
+
+	@Override
+	public void delete(T t) {
+		getSession().delete(t);
+		getSession().flush();
+	}
+	
+	@Override
+	public void update(T t){
+		getSession().update(t);
+		getSession().flush();
 	}
 }
