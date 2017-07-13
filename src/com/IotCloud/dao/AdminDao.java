@@ -15,4 +15,5 @@ public interface AdminDao {
 	public boolean deleteAdmin(String userName);
 	public List<Admin> getAdminList();
 	public int updatePassword(String userName, String oldPasswd, String newPasswd);
+	public int resetPassword(String userName);
 }

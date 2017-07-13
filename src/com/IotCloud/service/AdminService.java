@@ -10,8 +10,6 @@ import com.IotCloud.dao.AdminDao;
 import com.IotCloud.model.Admin;
 import com.IotCloud.util.PasswordUtil;
 
-import net.sf.json.JSONObject;
-
 
 @Component("adminService")
 @Service
@@ -35,23 +33,16 @@ public class AdminService {
 		return adminDao.deleteAdmin(userName);
 	}
 	
-	public JSONObject validatePassword(String userName, String inputPasswd) {
+	public Admin validatePassword(String userName, String inputPasswd) {
 		Admin admin = adminDao.getAdminByUserName(userName);
-		JSONObject jsonObject = new JSONObject();
 		if(admin == null) {
-			jsonObject.put("state", 1);
-			return jsonObject;
+			return null;
 		}
 		String passwdDigest = PasswordUtil.generatePassword(inputPasswd);
 		if(passwdDigest!=null && passwdDigest.equals(admin.getUserPasswd())) {
-			jsonObject.put("state", 0);
-			jsonObject.put("adminId", admin.getAdminId());
-			jsonObject.put("orgName", admin.getOrgName());
-			jsonObject.put("auth", admin.getAuthority());
-			return jsonObject;
+			return admin;
 		}else {
-			jsonObject.put("state", 1);
-			return jsonObject;
+			return null;
 		}
 	}
 	
@@ -65,5 +56,9 @@ public class AdminService {
 	
 	public List<Admin> getAdminList(){
 		return adminDao.getAdminList();
+	}
+	
+	public int resetPassword(String userName) {
+		return adminDao.resetPassword(userName);
 	}
 }

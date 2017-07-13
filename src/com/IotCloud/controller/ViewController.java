@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.IotCloud.dao.AdminDao;
-import com.IotCloud.exception.UserNotLoggedInException;
 import com.IotCloud.model.Admin;
 import com.IotCloud.service.AdminService;
+import com.IotCloud.util.ResponseFilter;
+import com.IotCloud.constant.ParameterKeys;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @RestController
@@ -33,17 +35,22 @@ public class ViewController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	@ResponseBody
 	public ModelAndView login(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String userName = request.getParameter("user");
-		String password = request.getParameter("passwd");
+		String userName = request.getParameter(ParameterKeys.USER);
+		String password = request.getParameter(ParameterKeys.PASSWORD);
 		ModelAndView modelAndView = new ModelAndView();
-		JSONObject jsonObject = adminService.validatePassword(userName, password);
-		if (jsonObject.getInt("state") == 0) {
+		Admin admin = adminService.validatePassword(userName, password);
+		JSONObject jsonObject = new JSONObject();
+		if (admin!=null) {
 			modelAndView.setViewName("success");
-			request.getSession().setAttribute("adminId", jsonObject.getString("adminId"));
-			request.getSession().setAttribute("auth", jsonObject.getInt("auth"));
+			request.getSession().setAttribute(ParameterKeys.ADMIN_ID, admin.getAdminId());
+			request.getSession().setAttribute(ParameterKeys.AUTHORITY, admin.getAuthority());
 		} else {
 			modelAndView.setViewName("fail");
 		}
+		jsonObject.put(ParameterKeys.STATE, 0);
+		jsonObject.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
+		jsonObject.put("orgName", admin.getOrgName());
+		jsonObject.put(ParameterKeys.AUTHORITY, admin.getAuthority());
 		writeJsonToResponse(response, jsonObject);
 		return modelAndView;
 	}
@@ -55,75 +62,98 @@ public class ViewController {
 
 	@RequestMapping(value = "/addAdmin", method = RequestMethod.POST)
 	@ResponseBody
-	public String addAdmin(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = new JSONObject();
+	public JSONObject addAdmin(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
+		if(jsonObject.containsKey(ParameterKeys.STATE)) {
+			return jsonObject;
+		}
 		try {
-			Object adminId = request.getSession().getAttribute("adminId");
-			Object auth = request.getSession().getAttribute("auth");
-			if (adminId == null || auth == null || !auth.equals(0)) {
-				jsonObject.put("state", 2);
-				return jsonObject.toString();
-			}
-			boolean state = adminService.insertAdmin(request.getParameter("user"), request.getParameter("passwd"),
-					Integer.parseInt(request.getParameter("auth")), request.getParameter("orgName"),
+			boolean state = adminService.insertAdmin(request.getParameter(ParameterKeys.USER), request.getParameter(ParameterKeys.PASSWORD),
+					Integer.parseInt(request.getParameter(ParameterKeys.AUTHORITY)), request.getParameter("orgName"),
 					request.getParameter("areaCode"));
-			jsonObject.put("state", state ? 0 : 1);
-			return jsonObject.toString();
+			jsonObject.put(ParameterKeys.STATE, state ? 0 : 1);
+			return jsonObject;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put("state", 1);
-			return jsonObject.toString();
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
 		}
 	}
 
 	@RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
 	@ResponseBody
-	public String deleteAdmin(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = new JSONObject();
+	public JSONObject deleteAdmin(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
+		if(jsonObject.containsKey(ParameterKeys.STATE)) {
+			return jsonObject;
+		}
 		try {
-			Object adminId = request.getSession().getAttribute("adminId");
-			Object auth = request.getSession().getAttribute("auth");
-			if (adminId == null || auth == null || !auth.equals(0)) {
-				jsonObject.put("state", 2);
-				return jsonObject.toString();
-			}
-			boolean state = adminService.deleteAdmin(request.getParameter("user"));
-			jsonObject.put("state", state ? 0 : 1);
-			return jsonObject.toString();
+			boolean state = adminService.deleteAdmin(request.getParameter(ParameterKeys.USER));
+			jsonObject.put(ParameterKeys.STATE, state ? 0 : 1);
+			return jsonObject;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put("state", 1);
-			// writeJsonToResponse(response, jsonObject);
-			return jsonObject.toString();
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
 		}
 	}
 
 	@RequestMapping(value = "/getAdminList", method = RequestMethod.POST)
 	@ResponseBody
-	public List<Admin> getAdminList() {
-		return adminService.getAdminList();
+	public JSONObject getAdminList(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
+		if(jsonObject.containsKey(ParameterKeys.STATE)) {
+			return jsonObject;
+		}
+		try {
+			List<Admin> adminList = adminService.getAdminList();
+			JSONArray jsonArray = JSONArray.fromObject(adminList);
+			jsonObject.put(ParameterKeys.STATE, 0);
+			jsonObject.put("adminList", jsonArray);
+			return jsonObject;
+		}catch(Exception e) {
+			e.printStackTrace();
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
+		}
 	}
 
 	@RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
 	@ResponseBody
-	public String updatePassword(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = new JSONObject();
+	public JSONObject updatePassword(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
+		if(jsonObject.containsKey(ParameterKeys.STATE)) {
+			return jsonObject;
+		}
 		try {
-			Object adminId = request.getSession().getAttribute("adminId");
-			Object auth = request.getSession().getAttribute("auth");
-			if (adminId == null || auth == null || !auth.equals(0)) {
-				jsonObject.put("state", 2);
-				return jsonObject.toString();
-			}
-			int state = adminService.updatePassword(request.getParameter("user"), request.getParameter("oldPasswd"),
+			int state = adminService.updatePassword(request.getParameter(ParameterKeys.USER), request.getParameter(ParameterKeys.PASSWORD),
 					request.getParameter("newPasswd"));
-			jsonObject.put("state", state);
-			return jsonObject.toString();
+			jsonObject.put(ParameterKeys.STATE, state);
+			return jsonObject;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put("state", 1);
-			return jsonObject.toString();
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
 		}
+	}
+	
+	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+	@ResponseBody
+	public JSONObject resetPassword(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
+		if(jsonObject.containsKey(ParameterKeys.STATE)) {
+			return jsonObject;
+		}
+		try {
+			int state = adminService.resetPassword(request.getParameter(ParameterKeys.USER));
+			jsonObject.put(ParameterKeys.STATE, state);
+			return jsonObject;
+		}catch (Exception e) {
+			e.printStackTrace();
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
+		}
+		
 	}
 
 	private void writeJsonToResponse(HttpServletResponse response, JSONObject json) throws IOException {

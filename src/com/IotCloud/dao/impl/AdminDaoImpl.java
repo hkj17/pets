@@ -7,14 +7,13 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.IotCloud.constant.DefaultValues;
 import com.IotCloud.constant.Hql;
 import com.IotCloud.dao.AdminDao;
 import com.IotCloud.dao.BaseDao;
 import com.IotCloud.model.Admin;
 import com.IotCloud.util.CommonUtil;
 import com.IotCloud.util.PasswordUtil;
-
-import antlr.StringUtils;
 
 @Repository("adminDao")
 public class AdminDaoImpl implements AdminDao{
@@ -37,14 +36,6 @@ public class AdminDaoImpl implements AdminDao{
 	
 	@Override
 	public boolean insertAdmin(String userName, String userPasswd, int authority, String orgName, String areaCode) {
-//		try {
-//			baseDao.updateBySql(Hql.ADD_ADMIN, CommonUtil.generateRandomUUID(), userName,
-//					PasswordUtil.generatePassword(userPasswd), authority, orgName, areaCode);
-//			return true;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return false;
-//		}
 		Admin admin = new Admin();
 		admin.setAdminId(CommonUtil.generateRandomUUID());
 		admin.setUserName(userName);
@@ -58,7 +49,6 @@ public class AdminDaoImpl implements AdminDao{
 
 	@Override
 	public boolean deleteAdmin(String userName) {
-		//baseDao.updateBySql(Hql.DELETE_ADMIN_BY_USER_NAME, userName);
 		Admin admin = getAdminByUserName(userName);
 		if(admin == null) {
 			return false;
@@ -84,6 +74,18 @@ public class AdminDaoImpl implements AdminDao{
 			return 12;
 		}
 		admin.setUserPasswd(PasswordUtil.generatePassword(newPasswd));
+		baseDao.update(admin);
+		return 0;
+	}
+
+	@Override
+	public int resetPassword(String userName) {
+		Admin admin = getAdminByUserName(userName);
+		if(admin == null) {
+			//用户不存在
+			return 11;
+		}
+		admin.setUserPasswd(PasswordUtil.generatePassword(DefaultValues.DEFAULT_PASSWD));
 		baseDao.update(admin);
 		return 0;
 	}
