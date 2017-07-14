@@ -1,7 +1,5 @@
 package com.IotCloud.controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
-import com.IotCloud.dao.AdminDao;
 import com.IotCloud.model.Admin;
 import com.IotCloud.service.AdminService;
 import com.IotCloud.util.ResponseFilter;
@@ -24,35 +20,33 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @RestController
-public class ViewController {
-
-	@Autowired
-	AdminDao adminDao;
+public class AdminController {
 
 	@Autowired
 	AdminService adminService;
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	@ResponseBody
-	public ModelAndView login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public JSONObject login(HttpServletRequest request, HttpServletResponse response) {
 		String userName = request.getParameter(ParameterKeys.USER);
 		String password = request.getParameter(ParameterKeys.PASSWORD);
-		ModelAndView modelAndView = new ModelAndView();
 		Admin admin = adminService.validatePassword(userName, password);
 		JSONObject jsonObject = new JSONObject();
 		if (admin!=null) {
-			modelAndView.setViewName("success");
 			request.getSession().setAttribute(ParameterKeys.ADMIN_ID, admin.getAdminId());
 			request.getSession().setAttribute(ParameterKeys.AUTHORITY, admin.getAuthority());
 		} else {
-			modelAndView.setViewName("fail");
+			request.getSession().removeAttribute(ParameterKeys.ADMIN_ID);
+			request.getSession().removeAttribute(ParameterKeys.AUTHORITY);
+			jsonObject.put(ParameterKeys.STATE, 1);
+			return jsonObject;
 		}
 		jsonObject.put(ParameterKeys.STATE, 0);
 		jsonObject.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
 		jsonObject.put("orgName", admin.getOrgName());
 		jsonObject.put(ParameterKeys.AUTHORITY, admin.getAuthority());
-		writeJsonToResponse(response, jsonObject);
-		return modelAndView;
+		//writeJsonToResponse(response, jsonObject);
+		return jsonObject;
 	}
 
 	@RequestMapping("/")
@@ -98,7 +92,7 @@ public class ViewController {
 		}
 	}
 
-	@RequestMapping(value = "/getAdminList", method = RequestMethod.POST)
+	@RequestMapping(value = "/getAdminList", method = RequestMethod.GET)
 	@ResponseBody
 	public JSONObject getAdminList(HttpServletRequest request, HttpServletResponse response) {
 		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
@@ -156,11 +150,11 @@ public class ViewController {
 		
 	}
 
-	private void writeJsonToResponse(HttpServletResponse response, JSONObject json) throws IOException {
-		PrintWriter writer = response.getWriter();
-		response.setHeader("Content-type", "text/html;charset=UTF-8");
-		writer.print(json);
-		writer.flush();
-		writer.close();
-	}
+//	private void writeJsonToResponse(HttpServletResponse response, JSONObject json) throws IOException {
+//		PrintWriter writer = response.getWriter();
+//		response.setHeader("Content-type", "text/html;charset=UTF-8");
+//		writer.print(json);
+//		writer.flush();
+//		writer.close();
+//	}
 }

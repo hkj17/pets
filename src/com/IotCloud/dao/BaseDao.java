@@ -37,5 +37,8 @@ public interface BaseDao<T> {
 	 */
 	public void delete(T t);
 	
+	/**
+	 * 按对象更新
+	 */
 	public void update(T t);
 }
