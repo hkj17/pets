@@ -1,23 +1,24 @@
 package com.IotCloud.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.IotCloud.model.Admin;
 import com.IotCloud.service.AdminService;
+import com.IotCloud.util.CommonUtil;
 import com.IotCloud.util.ResponseFilter;
 import com.IotCloud.constant.ParameterKeys;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 @RestController
 public class AdminController {
@@ -27,26 +28,26 @@ public class AdminController {
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	@ResponseBody
-	public JSONObject login(HttpServletRequest request, HttpServletResponse response) {
-		String userName = request.getParameter(ParameterKeys.USER);
-		String password = request.getParameter(ParameterKeys.PASSWORD);
+	public Map<String, Object> login(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.USER) String userName,
+			@RequestParam(value = ParameterKeys.PASSWORD) String password) {
 		Admin admin = adminService.validatePassword(userName, password);
-		JSONObject jsonObject = new JSONObject();
-		if (admin!=null) {
+		Map<String, Object> res = new HashMap<String, Object>();
+		if (admin != null) {
 			request.getSession().setAttribute(ParameterKeys.ADMIN_ID, admin.getAdminId());
 			request.getSession().setAttribute(ParameterKeys.AUTHORITY, admin.getAuthority());
 		} else {
 			request.getSession().removeAttribute(ParameterKeys.ADMIN_ID);
 			request.getSession().removeAttribute(ParameterKeys.AUTHORITY);
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
+			res.put(ParameterKeys.STATE, 1);
+			return res;
 		}
-		jsonObject.put(ParameterKeys.STATE, 0);
-		jsonObject.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
-		jsonObject.put("orgName", admin.getOrgName());
-		jsonObject.put(ParameterKeys.AUTHORITY, admin.getAuthority());
-		//writeJsonToResponse(response, jsonObject);
-		return jsonObject;
+		res.put(ParameterKeys.STATE, 0);
+		res.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
+		res.put("orgName", admin.getOrgName());
+		res.put(ParameterKeys.AUTHORITY, admin.getAuthority());
+		// writeJsonToResponse(response, jsonObject);
+		return res;
 	}
 
 	@RequestMapping("/")
@@ -56,105 +57,135 @@ public class AdminController {
 
 	@RequestMapping(value = "/addAdmin", method = RequestMethod.POST)
 	@ResponseBody
-	public JSONObject addAdmin(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
-		if(jsonObject.containsKey(ParameterKeys.STATE)) {
-			return jsonObject;
+	public Map<String, Object> addAdmin(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.USER) String userName,
+			@RequestParam(value = ParameterKeys.PASSWORD) String password,
+			@RequestParam(value = ParameterKeys.AUTHORITY) int authority,
+			@RequestParam(value = "orgName") String orgName, @RequestParam(value = "areaCode") String areaCode) {
+		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
 		}
+
 		try {
-			boolean state = adminService.insertAdmin(request.getParameter(ParameterKeys.USER), request.getParameter(ParameterKeys.PASSWORD),
-					Integer.parseInt(request.getParameter(ParameterKeys.AUTHORITY)), request.getParameter("orgName"),
-					request.getParameter("areaCode"));
-			jsonObject.put(ParameterKeys.STATE, state ? 0 : 1);
-			return jsonObject;
+			boolean state = adminService.insertAdmin(userName, password, authority, orgName, areaCode);
+			res.put(ParameterKeys.STATE, state ? 0 : 1);
+			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
+			res.put(ParameterKeys.STATE, 1);
+			return res;
 		}
 	}
 
-	@RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
+//	@RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
+//	@ResponseBody
+//	public Map<String, Object> deleteAdmin(HttpServletRequest request,
+//			@RequestParam(value = ParameterKeys.USER) String userName) {
+//		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+//		if (res.containsKey(ParameterKeys.STATE)) {
+//			return res;
+//		}
+//
+//		try {
+//			boolean state = adminService.deleteAdmin(userName);
+//			res.put(ParameterKeys.STATE, state ? 0 : 1);
+//			return res;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			res.put(ParameterKeys.STATE, 1);
+//			return res;
+//		}
+//	}
+	
+	@RequestMapping(value = "/batchDeleteAdmin", method = RequestMethod.POST)
 	@ResponseBody
-	public JSONObject deleteAdmin(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
-		if(jsonObject.containsKey(ParameterKeys.STATE)) {
-			return jsonObject;
+	public Map<String, Object> batchDeleteAdmin(HttpServletRequest request,
+			@RequestBody List<Admin> adminList){
+		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
 		}
+		
 		try {
-			boolean state = adminService.deleteAdmin(request.getParameter(ParameterKeys.USER));
-			jsonObject.put(ParameterKeys.STATE, state ? 0 : 1);
-			return jsonObject;
+			boolean state = adminService.batchDeleteAdmin(adminList);
+			res.put(ParameterKeys.STATE, state ? 0 : 1);
+			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
+			res.put(ParameterKeys.STATE, 1);
+			return res;
 		}
 	}
 
 	@RequestMapping(value = "/getAdminList", method = RequestMethod.GET)
 	@ResponseBody
-	public JSONObject getAdminList(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
-		if(jsonObject.containsKey(ParameterKeys.STATE)) {
-			return jsonObject;
+	public Map<String, Object> getAdminList(HttpServletRequest request) {
+		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
 		}
+
 		try {
 			List<Admin> adminList = adminService.getAdminList();
-			JSONArray jsonArray = JSONArray.fromObject(adminList);
-			jsonObject.put(ParameterKeys.STATE, 0);
-			jsonObject.put("adminList", jsonArray);
-			return jsonObject;
-		}catch(Exception e) {
+			res.put(ParameterKeys.STATE, 0);
+			res.put("adminList", adminList);
+			return res;
+		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
+			res.put(ParameterKeys.STATE, 1);
+			return res;
 		}
 	}
 
 	@RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
 	@ResponseBody
-	public JSONObject updatePassword(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
-		if(jsonObject.containsKey(ParameterKeys.STATE)) {
-			return jsonObject;
+	public Map<String, Object> updatePassword(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.PASSWORD) String password,
+			@RequestParam(value = "newPasswd") String newPasswd) {
+		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
 		}
+
 		try {
-			int state = adminService.updatePassword(request.getParameter(ParameterKeys.USER), request.getParameter(ParameterKeys.PASSWORD),
-					request.getParameter("newPasswd"));
-			jsonObject.put(ParameterKeys.STATE, state);
-			return jsonObject;
+			int state = adminService.updatePassword(CommonUtil.getSessionUser(request), password, newPasswd);
+			res.put(ParameterKeys.STATE, state);
+			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
+			res.put(ParameterKeys.STATE, 1);
+			return res;
 		}
-	}
-	
-	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-	@ResponseBody
-	public JSONObject resetPassword(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject jsonObject = ResponseFilter.adminServiceFilter(request);
-		if(jsonObject.containsKey(ParameterKeys.STATE)) {
-			return jsonObject;
-		}
-		try {
-			int state = adminService.resetPassword(request.getParameter(ParameterKeys.USER));
-			jsonObject.put(ParameterKeys.STATE, state);
-			return jsonObject;
-		}catch (Exception e) {
-			e.printStackTrace();
-			jsonObject.put(ParameterKeys.STATE, 1);
-			return jsonObject;
-		}
-		
 	}
 
-//	private void writeJsonToResponse(HttpServletResponse response, JSONObject json) throws IOException {
-//		PrintWriter writer = response.getWriter();
-//		response.setHeader("Content-type", "text/html;charset=UTF-8");
-//		writer.print(json);
-//		writer.flush();
-//		writer.close();
-//	}
+	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> resetPassword(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.USER) String userName) {
+		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
+		}
+
+		try {
+			int state = adminService.resetPassword(userName);
+			res.put(ParameterKeys.STATE, state);
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+			res.put(ParameterKeys.STATE, 1);
+			return res;
+		}
+
+	}
+
+	// private void writeJsonToResponse(HttpServletResponse response, JSONObject
+	// json) throws IOException {
+	// PrintWriter writer = response.getWriter();
+	// response.setHeader("Content-type", "text/html;charset=UTF-8");
+	// writer.print(json);
+	// writer.flush();
+	// writer.close();
+	// }
 }

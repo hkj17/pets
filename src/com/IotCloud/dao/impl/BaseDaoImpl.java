@@ -17,6 +17,8 @@ import com.IotCloud.util.CommonUtil;
 @Repository("baseDao")
 public class BaseDaoImpl<T> implements BaseDao<T> {
 	
+	public final static int batchSize = 10;
+	
 	@Autowired
 	private SessionFactory sessionFactory;
 
@@ -86,5 +88,37 @@ public class BaseDaoImpl<T> implements BaseDao<T> {
 	public void update(T t){
 		getSession().update(t);
 		getSession().flush();
+	}
+	
+	@Override
+	public void batchAdd(List<T> list) {
+		Session session = getSession();
+		if (!CommonUtil.isEmpty(list)) {
+			int listSize = list.size();
+			for (int i = 0; i < listSize; i++) {
+				session.persist(list.get(i));
+				if ((i + 1) % batchSize == 0) {
+					session.flush();
+					session.clear();
+				}
+			}
+			session.flush();
+		}
+	}
+	
+	@Override
+	public void batchDelete(List<T> list) {
+		Session session = getSession();
+		if (!CommonUtil.isEmpty(list)) {
+			int listSize = list.size();
+			for (int i = 0; i < listSize; i++) {
+				session.delete(list.get(i));
+				if ((i + 1) % batchSize == 0) {
+					session.flush();
+					session.clear();
+				}
+			}
+			session.flush();
+		}
 	}
 }

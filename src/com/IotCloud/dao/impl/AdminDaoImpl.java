@@ -35,6 +35,12 @@ public class AdminDaoImpl implements AdminDao{
 	}
 	
 	@Override
+	public Admin getAdminById(String adminId) {
+		Admin admin = baseDao.getByHql(Hql.GET_USER_BY_ID, adminId);
+		return admin;
+	}
+	
+	@Override
 	public boolean insertAdmin(String userName, String userPasswd, int authority, String orgName, String areaCode) {
 		Admin admin = new Admin();
 		admin.setAdminId(CommonUtil.generateRandomUUID());
@@ -47,15 +53,15 @@ public class AdminDaoImpl implements AdminDao{
 		return true;
 	}
 
-	@Override
-	public boolean deleteAdmin(String userName) {
-		Admin admin = getAdminByUserName(userName);
-		if(admin == null) {
-			return false;
-		}
-		baseDao.delete(admin);
-		return true;
-	}
+//	@Override
+//	public boolean deleteAdmin(String userName) {
+//		Admin admin = getAdminByUserName(userName);
+//		if(admin == null) {
+//			return false;
+//		}
+//		baseDao.delete(admin);
+//		return true;
+//	}
 
 	@Override
 	public List<Admin> getAdminList() {
@@ -63,8 +69,8 @@ public class AdminDaoImpl implements AdminDao{
 	}
 
 	@Override
-	public int updatePassword(String userName, String oldPasswd, String newPasswd) {
-		Admin admin = getAdminByUserName(userName);
+	public int updatePassword(String adminId, String oldPasswd, String newPasswd) {
+		Admin admin = getAdminById(adminId);
 		if(admin == null) {
 			//用户不存在
 			return 11;
@@ -88,5 +94,15 @@ public class AdminDaoImpl implements AdminDao{
 		admin.setUserPasswd(PasswordUtil.generatePassword(DefaultValues.DEFAULT_PASSWD));
 		baseDao.update(admin);
 		return 0;
+	}
+
+	@Override
+	public boolean batchDeleteAdmin(List<Admin> adminList) {
+		if(!CommonUtil.isEmpty(adminList)) {
+			baseDao.batchDelete(adminList);
+			return true;
+		}else {
+			return false;
+		}
 	}
 }

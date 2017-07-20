@@ -30,7 +30,12 @@ public interface TestDao {
 	/**
 	 * 删除考试项目
 	 */
-	public boolean deleteTestItem(String adminId, String itemId);
+	//public boolean deleteTestItem(String adminId, String itemId);
+	
+	/**
+	 * 批量删除考试项目
+	 */
+	public boolean batchDeleteTestItem(List<Test> testList);
 	
 	/**
 	 * 根据管理员id查找测试项目
@@ -45,22 +50,23 @@ public interface TestDao {
 	/**
 	 * 添加评分标准
 	 */
-	public String addEvaluation(String testId, int gender, double lowerBound, double upperBound, String unit, double point);
+	public boolean addEvaluation(List<Evaluation> evalList);
+	
+	
+	/**
+	 * 删除评分标准列表
+	 */
+	public boolean deleteEvaluation(List<Evaluation> evalList);
 	
 	/**
 	 * 删除评分标准
 	 */
-	public boolean deleteEvaluation(String testId, int gender, double point);
+	public boolean clearEvaluation(String adminId, String itemName, int gender);
 	
 	/**
-	 * 修改评分标准
+	 * 根据考试项目获取评分标准列表
 	 */
-	public boolean editEvaluation(String evalId, double lowerBound, double upperBound, double point);
-	
-	/**
-	 * 根据性别获取评分标准列表
-	 */
-	public List<Evaluation> getEvaluationList(String testId, int gender);
+	public List<Evaluation> getEvaluationList(String testId);
 	
 	/**
 	 * 按照id查找项目
@@ -76,4 +82,9 @@ public interface TestDao {
 	 * 按照id查找考试项目
 	 */
 	public Test getTestById(String testId);
+	
+	/**
+	 * 按照项目名称查找考试项目
+	 */
+	public Test getTestItemByName(String adminId, String itemName);
 }

@@ -41,4 +41,14 @@ public interface BaseDao<T> {
 	 * 按对象更新
 	 */
 	public void update(T t);
+	
+	/**
+	 * 批量添加
+	 */
+	public void batchAdd(List<T> list);
+	
+	/**
+	 * 批量删除
+	 */
+	public void batchDelete(List<T> list);
 }

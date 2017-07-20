@@ -11,9 +11,14 @@ import com.IotCloud.model.Admin;
  */
 public interface AdminDao {
 	/**
-	 * 按用户名查找
+	 * 按管理员id查找
 	 */
 	public Admin getAdminByUserName(String userName);
+	
+	/**
+	 * 按管理员id查找
+	 */
+	public Admin getAdminById(String adminId);
 	
 	/**
 	 * 插入数据到管理员表
@@ -23,7 +28,12 @@ public interface AdminDao {
 	/**
 	 * 按名字删除管理员
 	 */
-	public boolean deleteAdmin(String userName);
+	//public boolean deleteAdmin(String userName);
+	
+	/**
+	 * 批量删除管理员
+	 */
+	public boolean batchDeleteAdmin(List<Admin> adminList);
 	
 	/**
 	 * 获得普通管理员列表

@@ -29,8 +29,12 @@ public class AdminService {
 		
 	}
 	
-	public boolean deleteAdmin(String userName) {
-		return adminDao.deleteAdmin(userName);
+//	public boolean deleteAdmin(String userName) {
+//		return adminDao.deleteAdmin(userName);
+//	}
+	
+	public boolean batchDeleteAdmin(List<Admin> adminList) {
+		return adminDao.batchDeleteAdmin(adminList);
 	}
 	
 	public Admin validatePassword(String userName, String inputPasswd) {
@@ -46,12 +50,12 @@ public class AdminService {
 		}
 	}
 	
-	public int updatePassword(String userName, String oldPasswd, String newPasswd) {
+	public int updatePassword(String adminId, String oldPasswd, String newPasswd) {
 		if(newPasswd==null || newPasswd.isEmpty()) {
 			//新密码格式不正确
 			return 13;
 		}
-		return adminDao.updatePassword(userName, oldPasswd, newPasswd);
+		return adminDao.updatePassword(adminId, oldPasswd, newPasswd);
 	}
 	
 	public List<Admin> getAdminList(){
