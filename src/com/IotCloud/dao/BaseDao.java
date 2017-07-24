@@ -2,6 +2,8 @@ package com.IotCloud.dao;
 
 import java.util.List;
 
+import org.hibernate.Session;
+
 
 /**
  * 基础DAO层
@@ -10,6 +12,11 @@ import java.util.List;
  * @param <T>
  */
 public interface BaseDao<T> {
+	
+	/**
+	 * 
+	 */
+	public Session getSession();
 	
 	/**
 	 * 根据HQL进行查询，返回所有符合条件的记录

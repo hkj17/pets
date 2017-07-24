@@ -54,6 +54,26 @@ public class TestController {
 		}
 	}
 
+	@RequestMapping(value = "/getUnaddedItemList", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> getUnaddedItemList(HttpServletRequest request) {
+		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
+		}
+
+		try {
+			List<Item> unaddedItemList = testService.getUnaddedItemList(CommonUtil.getSessionUser(request));
+			res.put(ParameterKeys.STATE, 0);
+			res.put("unaddedItemList", unaddedItemList);
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+			res.put(ParameterKeys.STATE, 1);
+			return res;
+		}
+	}
+
 	@RequestMapping(value = "/addItem", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> addItem(HttpServletRequest request, @RequestParam(value = "itemName") String itemName) {
@@ -94,30 +114,30 @@ public class TestController {
 		}
 	}
 
-//	@RequestMapping(value = "/deleteTestItem", method = RequestMethod.POST)
-//	@ResponseBody
-//	public Map<String, Object> deleteTestItem(HttpServletRequest request,
-//			@RequestParam(value = ParameterKeys.ITEM_ID) String itemId) {
-//		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-//		if (res.containsKey(ParameterKeys.STATE)) {
-//			return res;
-//		}
-//
-//		try {
-//			boolean state = testService.deleteTestItem(CommonUtil.getSessionUser(request), itemId);
-//			res.put(ParameterKeys.STATE, state ? 0 : 1);
-//			return res;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			res.put(ParameterKeys.STATE, 1);
-//			return res;
-//		}
-//	}
-	
+	// @RequestMapping(value = "/deleteTestItem", method = RequestMethod.POST)
+	// @ResponseBody
+	// public Map<String, Object> deleteTestItem(HttpServletRequest request,
+	// @RequestParam(value = ParameterKeys.ITEM_ID) String itemId) {
+	// Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
+	// if (res.containsKey(ParameterKeys.STATE)) {
+	// return res;
+	// }
+	//
+	// try {
+	// boolean state =
+	// testService.deleteTestItem(CommonUtil.getSessionUser(request), itemId);
+	// res.put(ParameterKeys.STATE, state ? 0 : 1);
+	// return res;
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// res.put(ParameterKeys.STATE, 1);
+	// return res;
+	// }
+	// }
+
 	@RequestMapping(value = "/batchDeleteTestItem", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> batchDeleteTestItem(HttpServletRequest request,
-			@RequestBody List<Test> testList){
+	public Map<String, Object> batchDeleteTestItem(HttpServletRequest request, @RequestBody List<Test> testList) {
 		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
@@ -126,7 +146,7 @@ public class TestController {
 			boolean state = testService.batchDeleteTestItem(CommonUtil.getSessionUser(request), testList);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
 			return res;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			res.put(ParameterKeys.STATE, 1);
 			return res;
@@ -220,17 +240,17 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/getEvaluationList/{testId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getEvaluationList/{testId}/type/{type}", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getEvaluationList(HttpServletRequest request,
-			@PathVariable(ParameterKeys.TEST_ID) String testId) {
+			@PathVariable(ParameterKeys.TEST_ID) String testId, @PathVariable(ParameterKeys.TYPE) int type) {
 		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
 		}
 
 		try {
-			List<Evaluation> evalList = testService.getEvaluationList(CommonUtil.getSessionUser(request), testId);
+			List<Evaluation> evalList = testService.getEvaluationList(CommonUtil.getSessionUser(request), testId, type);
 			// 考试项目不属于该账户
 			if (evalList == null) {
 				res.put(ParameterKeys.STATE, 11);
@@ -247,8 +267,8 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/loadEvalView")
-	public String loadEvalView() {
-		return "loadEval";
+	@RequestMapping(value = "/loadView")
+	public String loadView() {
+		return "loadTest";
 	}
 }

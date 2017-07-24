@@ -38,6 +38,11 @@ public class TestDaoImpl implements TestDao {
 	public List<Item> getItemList() {
 		return itemBaseDao.findByHql(Hql.GET_ITEM_LIST);
 	}
+	
+	@Override
+	public List<Item> getUnaddedItemList(String adminId) {
+		return itemBaseDao.findByHql(Hql.GET_UNADDED_ITEM_LIST, adminId);
+	}
 
 	@Override
 	public boolean addItem(String itemName) {
@@ -91,7 +96,7 @@ public class TestDaoImpl implements TestDao {
 
 	@Override
 	public boolean editTestType(String adminId, String itemId, int type) {
-		Test test = getTestItemByAdminAndItemId(adminId, itemId);
+		Test test = getTestItemByItemId(adminId, itemId);
 		if (test == null) {
 			return false;
 		} else {
@@ -102,13 +107,13 @@ public class TestDaoImpl implements TestDao {
 	}
 
 	@Override
-	public boolean addEvaluation(List<Evaluation> evalList) {
+	public boolean addEvaluations(List<Evaluation> evalList) {
 		evalBaseDao.batchAdd(evalList);
 		return true;
 	}
 	
 	@Override
-	public boolean deleteEvaluation(List<Evaluation> evalList) {
+	public boolean deleteEvaluations(List<Evaluation> evalList) {
 		if(CommonUtil.isEmpty(evalList)) {
 			return false;
 		}
@@ -132,15 +137,26 @@ public class TestDaoImpl implements TestDao {
 	public List<Evaluation> getEvaluationList(String testId) {
 		return evalBaseDao.findByHql(Hql.GET_EVAL_LIST_BY_TEST_ID, testId);
 	}
+	
+
+	@Override
+	public List<Evaluation> getEvaluationList(String testId, int type) {
+		return evalBaseDao.findByHql(Hql.GET_EVAL_LIST_BY_GENDER, testId, type);
+	}
 
 	@Override
 	public Item getItemById(String itemId) {
 		return itemBaseDao.getByHql(Hql.GET_ITEM_BY_ID, itemId);
 	}
+	
+	@Override
+	public Item getItemByName(String itemName) {
+		return itemBaseDao.getByHql(Hql.GET_ITEM_BY_NAME, itemName);
+	}
 
 	@Override
-	public Test getTestItemByAdminAndItemId(String adminId, String itemId) {
-		return testBaseDao.getByHql(Hql.GET_TEST_BY_ADMIN_AND_ITEM_ID, adminId, itemId);
+	public Test getTestItemByItemId(String adminId, String itemId) {
+		return testBaseDao.getByHql(Hql.GET_TEST_BY_ITEM_ID, adminId, itemId);
 	}
 
 	@Override

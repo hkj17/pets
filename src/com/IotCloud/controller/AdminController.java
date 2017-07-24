@@ -68,7 +68,8 @@ public class AdminController {
 		}
 
 		try {
-			boolean state = adminService.insertAdmin(userName, password, authority, orgName, areaCode);
+			boolean state = adminService.insertAdmin(CommonUtil.getSessionUser(request), userName, password, authority,
+					orgName, areaCode);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
 			return res;
 		} catch (Exception e) {
@@ -78,35 +79,34 @@ public class AdminController {
 		}
 	}
 
-//	@RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
-//	@ResponseBody
-//	public Map<String, Object> deleteAdmin(HttpServletRequest request,
-//			@RequestParam(value = ParameterKeys.USER) String userName) {
-//		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-//		if (res.containsKey(ParameterKeys.STATE)) {
-//			return res;
-//		}
-//
-//		try {
-//			boolean state = adminService.deleteAdmin(userName);
-//			res.put(ParameterKeys.STATE, state ? 0 : 1);
-//			return res;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			res.put(ParameterKeys.STATE, 1);
-//			return res;
-//		}
-//	}
-	
+	// @RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
+	// @ResponseBody
+	// public Map<String, Object> deleteAdmin(HttpServletRequest request,
+	// @RequestParam(value = ParameterKeys.USER) String userName) {
+	// Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
+	// if (res.containsKey(ParameterKeys.STATE)) {
+	// return res;
+	// }
+	//
+	// try {
+	// boolean state = adminService.deleteAdmin(userName);
+	// res.put(ParameterKeys.STATE, state ? 0 : 1);
+	// return res;
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// res.put(ParameterKeys.STATE, 1);
+	// return res;
+	// }
+	// }
+
 	@RequestMapping(value = "/batchDeleteAdmin", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> batchDeleteAdmin(HttpServletRequest request,
-			@RequestBody List<Admin> adminList){
+	public Map<String, Object> batchDeleteAdmin(HttpServletRequest request, @RequestBody List<Admin> adminList) {
 		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
 		}
-		
+
 		try {
 			boolean state = adminService.batchDeleteAdmin(adminList);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
@@ -127,7 +127,7 @@ public class AdminController {
 		}
 
 		try {
-			List<Admin> adminList = adminService.getAdminList();
+			List<Admin> adminList = adminService.getAdminList(CommonUtil.getSessionUser(request));
 			res.put(ParameterKeys.STATE, 0);
 			res.put("adminList", adminList);
 			return res;
@@ -179,13 +179,4 @@ public class AdminController {
 		}
 
 	}
-
-	// private void writeJsonToResponse(HttpServletResponse response, JSONObject
-	// json) throws IOException {
-	// PrintWriter writer = response.getWriter();
-	// response.setHeader("Content-type", "text/html;charset=UTF-8");
-	// writer.print(json);
-	// writer.flush();
-	// writer.close();
-	// }
 }

@@ -41,7 +41,7 @@ public class AdminDaoImpl implements AdminDao{
 	}
 	
 	@Override
-	public boolean insertAdmin(String userName, String userPasswd, int authority, String orgName, String areaCode) {
+	public boolean insertAdmin(String adminId, String userName, String userPasswd, int authority, String orgName, String areaCode) {
 		Admin admin = new Admin();
 		admin.setAdminId(CommonUtil.generateRandomUUID());
 		admin.setUserName(userName);
@@ -49,6 +49,7 @@ public class AdminDaoImpl implements AdminDao{
 		admin.setAuthority(authority);
 		admin.setOrgName(orgName);
 		admin.setAreaCode(areaCode);
+		admin.setCreatedBy(adminId);
 		baseDao.add(admin);
 		return true;
 	}
@@ -64,8 +65,8 @@ public class AdminDaoImpl implements AdminDao{
 //	}
 
 	@Override
-	public List<Admin> getAdminList() {
-		return baseDao.findByHql(Hql.GET_ADMIN_LIST);
+	public List<Admin> getAdminList(String adminId) {
+		return baseDao.findByHql(Hql.GET_ADMIN_LIST, adminId);
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class AdminDaoImpl implements AdminDao{
 	}
 
 	@Override
-	public boolean batchDeleteAdmin(List<Admin> adminList) {
+	public boolean deleteAdmins(List<Admin> adminList) {
 		if(!CommonUtil.isEmpty(adminList)) {
 			baseDao.batchDelete(adminList);
 			return true;

@@ -32,13 +32,17 @@ public class TestService {
 	public List<Item> getItemList() {
 		return testDao.getItemList();
 	}
+	
+	public List<Item> getUnaddedItemList(String adminId){
+		return testDao.getUnaddedItemList(adminId);
+	}
 
 	public boolean addItem(String itemName) {
 		return testDao.addItem(itemName);
 	}
 
 	public int addTestItem(String adminId, String itemId, int type) {
-		Test test = testDao.getTestItemByAdminAndItemId(adminId, itemId);
+		Test test = testDao.getTestItemByItemId(adminId, itemId);
 		if (test != null) {
 			// 考试项目已经存在
 			return 11;
@@ -63,7 +67,7 @@ public class TestService {
 			}else {
 				//删除与考试项目对应的评分标准
 				List<Evaluation> evalList = testDao.getEvaluationList(test.getTestId());
-				testDao.deleteEvaluation(evalList);
+				testDao.deleteEvaluations(evalList);
 			}
 		}
 		return testDao.batchDeleteTestItem(testList);
@@ -165,11 +169,14 @@ public class TestService {
 				}
 				evalList.add(eval);
 			}
-			testDao.addEvaluation(evalList);
+			testDao.addEvaluations(evalList);
 			return "添加成功";
 		} catch (IOException e) {
 			e.printStackTrace();
 			return "文件格式错误";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "数据库错误";
 		}
 	}
 
@@ -177,12 +184,18 @@ public class TestService {
 		return testDao.clearEvaluation(adminId, itemName, gender);
 	}
 
-	public List<Evaluation> getEvaluationList(String adminId, String testId) {
+	public List<Evaluation> getEvaluationList(String adminId, String testId, int type) {
 		// 如果管理员没有这个测试项目，则不能查看测试项目的评分标准
 		Test test = testDao.getTestById(testId);
 		if (test == null || test.getAdminId() == null || !test.getAdminId().equals(adminId)) {
 			return null;
 		}
-		return testDao.getEvaluationList(testId);
+		
+		//没有对应的男生项或者女生项
+		if((test.getType() & type) == 0) {
+			return null;
+		}
+		
+		return testDao.getEvaluationList(testId, type);
 	}
 }

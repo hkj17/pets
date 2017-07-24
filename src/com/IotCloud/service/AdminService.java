@@ -18,11 +18,11 @@ public class AdminService {
 	@Autowired
 	private AdminDao adminDao;
 
-	public boolean insertAdmin(String userName, String userPasswd, int authority, String orgName, String areaCode) {
+	public boolean insertAdmin(String adminId, String userName, String userPasswd, int authority, String orgName, String areaCode) {
 		//不重复添加管理员
 		Admin admin = adminDao.getAdminByUserName(userName);
 		if(admin==null) {
-			return adminDao.insertAdmin(userName, userPasswd, authority, orgName, areaCode);
+			return adminDao.insertAdmin(adminId, userName, userPasswd, authority, orgName, areaCode);
 		}else {
 			return false;
 		}
@@ -34,7 +34,7 @@ public class AdminService {
 //	}
 	
 	public boolean batchDeleteAdmin(List<Admin> adminList) {
-		return adminDao.batchDeleteAdmin(adminList);
+		return adminDao.deleteAdmins(adminList);
 	}
 	
 	public Admin validatePassword(String userName, String inputPasswd) {
@@ -58,8 +58,8 @@ public class AdminService {
 		return adminDao.updatePassword(adminId, oldPasswd, newPasswd);
 	}
 	
-	public List<Admin> getAdminList(){
-		return adminDao.getAdminList();
+	public List<Admin> getAdminList(String adminId){
+		return adminDao.getAdminList(adminId);
 	}
 	
 	public int resetPassword(String userName) {

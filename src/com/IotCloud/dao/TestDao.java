@@ -18,6 +18,11 @@ public interface TestDao {
 	public List<Item> getItemList();
 	
 	/**
+	 * 返回项目列表
+	 */
+	public List<Item> getUnaddedItemList(String adminId);
+	
+	/**
 	 * 添加项目，不对外开放，只是测试使用
 	 */
 	public boolean addItem(String itemName);
@@ -50,13 +55,13 @@ public interface TestDao {
 	/**
 	 * 添加评分标准
 	 */
-	public boolean addEvaluation(List<Evaluation> evalList);
+	public boolean addEvaluations(List<Evaluation> evalList);
 	
 	
 	/**
 	 * 删除评分标准列表
 	 */
-	public boolean deleteEvaluation(List<Evaluation> evalList);
+	public boolean deleteEvaluations(List<Evaluation> evalList);
 	
 	/**
 	 * 删除评分标准
@@ -69,14 +74,24 @@ public interface TestDao {
 	public List<Evaluation> getEvaluationList(String testId);
 	
 	/**
+	 * 根据考试项目和类型获取评分标准列表
+	 */
+	public List<Evaluation> getEvaluationList(String testId, int type);
+	
+	/**
 	 * 按照id查找项目
 	 */
 	public Item getItemById(String itemId);
 	
 	/**
+	 * 按项目名称查找项目
+	 */
+	public Item getItemByName(String itemName);
+	
+	/**
 	 * 按照管理员id和项目id查找考试项目
 	 */
-	public Test getTestItemByAdminAndItemId(String adminId, String itemId);
+	public Test getTestItemByItemId(String adminId, String itemId);
 	
 	/**
 	 * 按照id查找考试项目
@@ -87,4 +102,5 @@ public interface TestDao {
 	 * 按照项目名称查找考试项目
 	 */
 	public Test getTestItemByName(String adminId, String itemName);
+	
 }

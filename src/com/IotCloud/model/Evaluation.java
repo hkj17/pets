@@ -5,8 +5,10 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
+@IdClass(EvalPKID.class)
 @Entity(name = "Evaluation")
 @Table(name = "evaluation")
 public class Evaluation implements Serializable {
@@ -16,13 +18,14 @@ public class Evaluation implements Serializable {
 	 */
 	private static final long serialVersionUID = 7252173290339962798L;
 	
-	@Id
 	@Column(name = "eval_id")
 	private String evalId;
 	
+	@Id
 	@Column(name = "test_id")
 	private String testId;
 
+	@Id
 	@Column(name = "type")
 	private int type;
 	
@@ -35,6 +38,7 @@ public class Evaluation implements Serializable {
 	@Column(name = "unit")
 	private String unit;
 	
+	@Id
 	@Column(name = "point")
 	private double point;
 	

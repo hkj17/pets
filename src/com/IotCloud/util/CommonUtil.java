@@ -12,6 +12,10 @@ public class CommonUtil {
 		return (collection == null || collection.isEmpty());
 	}
 	
+	public static boolean isNullOrEmpty(String str) {
+		return str == null || str.isEmpty();
+	}
+	
     public static String generateRandomUUID(){
     	return UUID.randomUUID().toString().trim().replaceAll("-", "");
     }

@@ -34,6 +34,9 @@ public class Admin implements Serializable {
 	
 	@Column(name = "area_code")
 	private String areaCode;
+	
+	@Column(name = "created_by")
+	private String createdBy;
 
 	public String getAdminId() {
 		return adminId;
@@ -83,4 +86,11 @@ public class Admin implements Serializable {
 		this.areaCode = areaCode;
 	}
 
+	public String getCreatedBy() {
+		return createdBy;
+	}
+	
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 }
