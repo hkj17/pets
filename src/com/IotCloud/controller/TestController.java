@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,8 @@ public class TestController {
 
 	@Autowired
 	TestService testService;
+	
+	private static Logger logger = Logger.getLogger(TestController.class);
 
 	@RequestMapping(value = "/getItemList", method = RequestMethod.GET)
 	@ResponseBody
@@ -41,7 +44,7 @@ public class TestController {
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
 		}
-
+//		Map<String, Object> res = new HashMap<String, Object>();
 		try {
 			List<Item> itemList = testService.getItemList();
 			res.put(ParameterKeys.STATE, 0);
@@ -49,6 +52,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取项目列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -69,6 +73,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取未添加为考试项目的项目列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -88,6 +93,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("添加项目异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -109,6 +115,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("添加考试项目异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -148,26 +155,29 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("批量删除考试项目异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/getTestItemList", method = RequestMethod.GET)
+	@RequestMapping(value = "/getTestItemList", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> getTestItemList(HttpServletRequest request) {
+	public Map<String, Object> getTestItemList(HttpServletRequest request,
+			@RequestParam(value = "type", required = false) Integer type) {
 		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
 		}
 
 		try {
-			List<Test> itemList = testService.getTestItemList(CommonUtil.getSessionUser(request));
+			List<Test> itemList = testService.getTestItemList(CommonUtil.getSessionUser(request), type);
 			res.put(ParameterKeys.STATE, 0);
 			res.put("testItemList", itemList);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取考试项目列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -189,6 +199,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("编辑考试类型异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -215,6 +226,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("批量导入评分标准异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			res.put("message", "参数格式错误");
 			return res;
@@ -235,6 +247,7 @@ public class TestController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("删除评分标准错误", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -250,25 +263,35 @@ public class TestController {
 		}
 
 		try {
-			List<Evaluation> evalList = testService.getEvaluationList(CommonUtil.getSessionUser(request), testId, type);
-			// 考试项目不属于该账户
-			if (evalList == null) {
+			Test test = testService.getTestById(testId);
+			if(test==null) {
+				//没有该考试项目
 				res.put(ParameterKeys.STATE, 11);
 				return res;
 			}
-
+			
+			List<Evaluation> evalList = testService.getEvaluationList(CommonUtil.getSessionUser(request), test, type);
+			// 考试项目不属于该账户
+			if (evalList == null) {
+				res.put(ParameterKeys.STATE, 12);
+				return res;
+			}
+			
+			String unit =testService.getUnitByTestItem(test);
 			res.put(ParameterKeys.STATE, 0);
 			res.put("evalList", evalList);
+			res.put("unit", unit);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取评分标准列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/loadView")
-	public String loadView() {
-		return "loadTest";
-	}
+//	@RequestMapping(value = "/loadView")
+//	public String loadView() {
+//		return "loadTest";
+//	}
 }

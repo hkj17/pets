@@ -1,5 +1,6 @@
 package com.IotCloud.dao.impl;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -38,7 +39,7 @@ public class TestDaoImpl implements TestDao {
 	public List<Item> getItemList() {
 		return itemBaseDao.findByHql(Hql.GET_ITEM_LIST);
 	}
-	
+
 	@Override
 	public List<Item> getUnaddedItemList(String adminId) {
 		return itemBaseDao.findByHql(Hql.GET_UNADDED_ITEM_LIST, adminId);
@@ -68,30 +69,38 @@ public class TestDaoImpl implements TestDao {
 		return 0;
 	}
 
-//	@Override
-//	public boolean deleteTestItem(String adminId, String itemId) {
-//		Test test = getTestItemByAdminAndItemId(adminId, itemId);
-//		if (test == null) {
-//			return false;
-//		} else {
-//			testBaseDao.delete(test);
-//			return true;
-//		}
-//	}
-	
+	// @Override
+	// public boolean deleteTestItem(String adminId, String itemId) {
+	// Test test = getTestItemByAdminAndItemId(adminId, itemId);
+	// if (test == null) {
+	// return false;
+	// } else {
+	// testBaseDao.delete(test);
+	// return true;
+	// }
+	// }
+
 	@Override
-	public boolean batchDeleteTestItem(List<Test> testList) {
-		if(!CommonUtil.isEmpty(testList)) {
-			testBaseDao.batchDelete(testList);
-			return true;
-		}else {
-			return false;
-		}
+	public boolean deleteTestItems(List<Test> testList) {
+		testBaseDao.batchDelete(testList);
+		return true;
 	}
 
 	@Override
-	public List<Test> getTestItemList(String adminId) {
-		return testBaseDao.findByHql(Hql.GET_TEST_ITEM_LIST, adminId);
+	public List<Test> getTestItemList(String adminId, Integer type) {
+		List<Test> testList = testBaseDao.findByHql(Hql.GET_TEST_ITEM_LIST, adminId);
+		if (type == null || CommonUtil.isEmpty(testList)) {
+			return testList;
+		} else {
+			Iterator<Test> iter = testList.iterator();
+			while (iter.hasNext()) {
+				Test test = iter.next();
+				if ((test.getType() & type) == 0) {
+					iter.remove();
+				}
+			}
+			return testList;
+		}
 	}
 
 	@Override
@@ -111,10 +120,10 @@ public class TestDaoImpl implements TestDao {
 		evalBaseDao.batchAdd(evalList);
 		return true;
 	}
-	
+
 	@Override
 	public boolean deleteEvaluations(List<Evaluation> evalList) {
-		if(CommonUtil.isEmpty(evalList)) {
+		if (CommonUtil.isEmpty(evalList)) {
 			return false;
 		}
 		evalBaseDao.batchDelete(evalList);
@@ -137,7 +146,6 @@ public class TestDaoImpl implements TestDao {
 	public List<Evaluation> getEvaluationList(String testId) {
 		return evalBaseDao.findByHql(Hql.GET_EVAL_LIST_BY_TEST_ID, testId);
 	}
-	
 
 	@Override
 	public List<Evaluation> getEvaluationList(String testId, int type) {
@@ -148,7 +156,7 @@ public class TestDaoImpl implements TestDao {
 	public Item getItemById(String itemId) {
 		return itemBaseDao.getByHql(Hql.GET_ITEM_BY_ID, itemId);
 	}
-	
+
 	@Override
 	public Item getItemByName(String itemName) {
 		return itemBaseDao.getByHql(Hql.GET_ITEM_BY_NAME, itemName);

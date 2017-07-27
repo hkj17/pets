@@ -30,14 +30,19 @@ public interface StudentDao {
 	public List<String> getSchoolNameListByAdminId(String adminId);
 	
 	/**
+	 * 删除学生的考试信息
+	 */
+	public boolean deleteTestResult(List<Record> recordList);
+	
+	/**
 	 * 返回一个学校下面所有的班级名称
 	 */
 	public List<String> getClassNameListBySchool(String adminId, String schoolName);
 	
 	/**
-	 * 返回一个管理员下面所有的学生
+	 * 返回学生列表
 	 */
-	List<Student> getStudentListByAdminId(String adminId);
+	List<Student> getStudentList(String adminId, String schoolName, String className, Integer gender);
 	
 	/**
 	 * 返回一个学校下面所有的学生

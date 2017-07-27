@@ -57,8 +57,31 @@ public class StudentDaoImpl implements StudentDao {
 	}
 
 	@Override
-	public List<Student> getStudentListByAdminId(String adminId) {
-		return studentBaseDao.findByHql(Hql.GET_STUDENT_LIST, adminId);
+	public List<Student> getStudentList(String adminId, String schoolName, String className, Integer gender) {
+		String sql = "from Student s where s.adminId = ?";
+		Map<Integer, Object> map = new HashMap<Integer, Object>();
+		map.put(0, adminId);
+		int i = 1;
+		if (!CommonUtil.isNullOrEmpty(schoolName)) {
+			sql += " and s.schoolName = ?";
+			map.put(i++, schoolName);
+		}
+		if (!CommonUtil.isNullOrEmpty(className)) {
+			sql += " and s.className = ?";
+			map.put(i++, className);
+		}
+		if (gender != null) {
+			sql += " and s.gender = ?";
+			map.put(i++, gender);
+		}
+		sql += " order by s.testerNo";
+		
+		Query query = studentBaseDao.getSession().createQuery(sql);
+		for (int p = 0; p < map.size(); p++) {
+			query.setParameter(p, map.get(p));
+		}
+		List<Student> list = query.list();
+		return list;
 	}
 
 	@Override
@@ -115,23 +138,24 @@ public class StudentDaoImpl implements StudentDao {
 	}
 
 	@Override
-	public List<StudentTestResult> getTestRecordByItem(String schoolName, String className, int gender, Item item, String startTime, String endTime) {
+	public List<StudentTestResult> getTestRecordByItem(String schoolName, String className, int gender, Item item,
+			String startTime, String endTime) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String sql = "select s.studentName, s.schoolName, s.className, s.studentNo, s.testerNo, r.result, r.createdAt from Student s, Record r "
 				+ "where s.adminId=r.adminId and s.testerNo=r.testerNo and s.gender=? and r.itemId=?";
 		Map<Integer, Object> map = new HashMap<Integer, Object>();
 		map.put(0, gender);
 		map.put(1, item.getItemId());
-		int i=2;
-		if(!CommonUtil.isNullOrEmpty(schoolName)) {
+		int i = 2;
+		if (!CommonUtil.isNullOrEmpty(schoolName)) {
 			sql += " and s.schoolName=?";
 			map.put(i++, schoolName);
 		}
-		if(!CommonUtil.isNullOrEmpty(className)) {
+		if (!CommonUtil.isNullOrEmpty(className)) {
 			sql += " and s.className=?";
 			map.put(i++, className);
 		}
-		
+
 		if (!CommonUtil.isNullOrEmpty(startTime)) {
 			startTime = startTime + " 00:00:00";
 			sql += " and r.createdAt>=?";
@@ -151,17 +175,17 @@ public class StudentDaoImpl implements StudentDao {
 				e.printStackTrace();
 			}
 		}
-		
+
 		sql += " order by s.testerNo";
-		
+
 		Query query = recordBaseDao.getSession().createQuery(sql);
 		for (int p = 0; p < map.size(); p++) {
 			query.setParameter(p, map.get(p));
 		}
-		
+
 		List<Object[]> list = query.list();
 		List<StudentTestResult> studentTestResultList = new ArrayList<StudentTestResult>();
-		for(int p=0;p<list.size();p++) {
+		for (int p = 0; p < list.size(); p++) {
 			StudentTestResult result = new StudentTestResult();
 			Object[] record = list.get(p);
 			result.setStudentName((String) record[0]);
@@ -173,9 +197,16 @@ public class StudentDaoImpl implements StudentDao {
 			result.setTestTime((Timestamp) record[6]);
 			result.setGender(gender);
 			result.setItemName(item.getItemName());
+			result.setUnit(item.getUnit());
 			studentTestResultList.add(result);
 		}
 		return studentTestResultList;
+	}
+
+	@Override
+	public boolean deleteTestResult(List<Record> recordList) {
+		recordBaseDao.batchDelete(recordList);
+		return true;
 	}
 
 }

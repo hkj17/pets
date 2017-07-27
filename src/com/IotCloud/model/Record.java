@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity(name = "Record")
 @Table(name = "record")
 public class Record implements Serializable{
@@ -34,6 +36,7 @@ public class Record implements Serializable{
 	private double result;
 	
 	@Column(name = "created_at")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Timestamp createdAt;
 	
 	public String getRecordId() {

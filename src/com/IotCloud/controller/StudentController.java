@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import com.IotCloud.constant.ParameterKeys;
 import com.IotCloud.data.StudentTestResult;
 import com.IotCloud.data.TestResult;
-import com.IotCloud.model.Item;
 import com.IotCloud.model.Student;
 import com.IotCloud.service.StudentService;
 import com.IotCloud.util.CommonUtil;
@@ -33,6 +33,8 @@ public class StudentController {
 
 	@Autowired
 	StudentService studentService;
+
+	private static Logger logger = Logger.getLogger(StudentController.class);
 
 	@RequestMapping(value = "/loadStudents", method = RequestMethod.POST)
 	@ResponseBody
@@ -46,7 +48,7 @@ public class StudentController {
 			MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
 			MultipartHttpServletRequest re = resolver.resolveMultipart(request);
 
-			MultipartFile fileM = re.getFile("filename2");
+			MultipartFile fileM = re.getFile("studentInfo");
 			CommonsMultipartFile cf = (CommonsMultipartFile) fileM;
 			InputStream inputStream = cf.getInputStream();
 			String message = studentService.loadStudentsFromXml(CommonUtil.getSessionUser(request), inputStream);
@@ -55,8 +57,28 @@ public class StudentController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("导入学生信息异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			res.put("message", "参数格式错误");
+			return res;
+		}
+	}
+
+	@RequestMapping(value = "/deleteStudents", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> deleteStudents(HttpServletRequest request, @RequestBody List<Student> studentList) {
+		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
+		if (res.containsKey(ParameterKeys.STATE)) {
+			return res;
+		}
+		try {
+			boolean state = studentService.deleteStudents(CommonUtil.getSessionUser(request), studentList);
+			res.put(ParameterKeys.STATE, state ? 0 : 1);
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("删除学生信息异常", e);
+			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
 	}
@@ -76,6 +98,7 @@ public class StudentController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取学校列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -97,26 +120,32 @@ public class StudentController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取班级列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/getStudentList", method = RequestMethod.GET)
+	@RequestMapping(value = "/getStudentList", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> getStudentList(HttpServletRequest request) {
+	public Map<String, Object> getStudentList(HttpServletRequest request,
+			@RequestParam(value = "schoolName", required = false) String schoolName,
+			@RequestParam(value = "className", required = false) String className,
+			@RequestParam(value = "gender", required = false) Integer gender) {
 		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
 		if (res.containsKey(ParameterKeys.STATE)) {
 			return res;
 		}
 
 		try {
-			List<Student> studentList = studentService.getStudentListByAdminId(CommonUtil.getSessionUser(request));
+			List<Student> studentList = studentService.getStudentList(CommonUtil.getSessionUser(request), schoolName,
+					className, gender);
 			res.put("studentList", studentList);
 			res.put(ParameterKeys.STATE, 0);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取学生列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -144,9 +173,11 @@ public class StudentController {
 			List<TestResult> testResultList = studentService.getRecordListByStudent(student, startTime, endTime);
 			res.put("testResultList", testResultList);
 			res.put("message", "查询成功");
+			res.put(ParameterKeys.STATE, 0);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询学生个人考试成绩异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			res.put("message", "出现异常");
 			return res;
@@ -170,9 +201,11 @@ public class StudentController {
 					CommonUtil.getSessionUser(request), schoolName, className, gender, itemName, startTime, endTime);
 			res.put("testResultList", testResultList);
 			res.put("message", "查询成功");
+			res.put(ParameterKeys.STATE, 0);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询单项所有学生考试成绩异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			res.put("message", "出现异常");
 			return res;

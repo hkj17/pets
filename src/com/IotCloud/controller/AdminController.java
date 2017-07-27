@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,8 @@ public class AdminController {
 
 	@Autowired
 	AdminService adminService;
+	
+	private static Logger logger = Logger.getLogger(AdminController.class);
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	@ResponseBody
@@ -46,14 +49,13 @@ public class AdminController {
 		res.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
 		res.put("orgName", admin.getOrgName());
 		res.put(ParameterKeys.AUTHORITY, admin.getAuthority());
-		// writeJsonToResponse(response, jsonObject);
 		return res;
 	}
 
-	@RequestMapping("/")
-	public String loginView() {
-		return "login";
-	}
+//	@RequestMapping("/")
+//	public String loginView() {
+//		return "login";
+//	}
 
 	@RequestMapping(value = "/addAdmin", method = RequestMethod.POST)
 	@ResponseBody
@@ -74,6 +76,7 @@ public class AdminController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("添加管理员异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -113,6 +116,7 @@ public class AdminController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("批量删除管理员异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -133,6 +137,7 @@ public class AdminController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("获取管理员列表异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -154,6 +159,7 @@ public class AdminController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("更新管理员密码异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}
@@ -174,6 +180,7 @@ public class AdminController {
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("重置管理员密码异常", e);
 			res.put(ParameterKeys.STATE, 1);
 			return res;
 		}

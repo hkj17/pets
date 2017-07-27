@@ -35,8 +35,8 @@ public class Evaluation implements Serializable {
 	@Column(name = "upper_bound")
 	private double upperBound;
 	
-	@Column(name = "unit")
-	private String unit;
+	//@Column(name = "unit")
+	//private String unit;
 	
 	@Id
 	@Column(name = "point")
@@ -82,13 +82,13 @@ public class Evaluation implements Serializable {
 		this.upperBound = upperBound;
 	}
 	
-	public String getUnit() {
-		return unit;
-	}
-	
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
+//	public String getUnit() {
+//		return unit;
+//	}
+//	
+//	public void setUnit(String unit) {
+//		this.unit = unit;
+//	}
 	
 	public double getPoint() {
 		return point;

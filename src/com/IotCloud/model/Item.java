@@ -24,6 +24,9 @@ public class Item implements Serializable {
 	@Column(name = "item_name")
 	private String itemName;
 	
+	@Column(name = "unit")
+	private String unit;
+	
 	public String getItemId() {
 		return itemId;
 	}
@@ -38,5 +41,13 @@ public class Item implements Serializable {
 	
 	public void setItemName(String itemName) {
 		this.itemName = itemName;
+	}
+	
+	public String getUnit() {
+		return unit;
+	}
+	
+	public void setUnit(String unit) {
+		this.unit = unit;
 	}
 }

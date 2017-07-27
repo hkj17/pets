@@ -40,12 +40,12 @@ public interface TestDao {
 	/**
 	 * 批量删除考试项目
 	 */
-	public boolean batchDeleteTestItem(List<Test> testList);
+	public boolean deleteTestItems(List<Test> testList);
 	
 	/**
 	 * 根据管理员id查找测试项目
 	 */
-	public List<Test> getTestItemList(String adminId);
+	public List<Test> getTestItemList(String adminId, Integer type);
 	
 	/**
 	 * 修改考试项目类型

@@ -2,6 +2,8 @@ package com.IotCloud.data;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class StudentTestResult {
 	private String studentName;
 	private int gender;
@@ -13,6 +15,9 @@ public class StudentTestResult {
 	private String itemName;
 	private double result;
 	private double point;
+	private String unit;
+	
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Timestamp testTime;
 	
 	public String getStudentName() {
@@ -85,6 +90,14 @@ public class StudentTestResult {
 
 	public void setPoint(double point) {
 		this.point = point;
+	}
+	
+	public String getUnit() {
+		return unit;
+	}
+	
+	public void setUnit(String unit) {
+		this.unit = unit;
 	}
 
 	public Timestamp getTestTime() {

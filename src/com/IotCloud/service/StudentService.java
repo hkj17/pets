@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,6 +39,8 @@ public class StudentService {
 
 	@Autowired
 	TestDao testDao;
+	
+	private static Logger logger = Logger.getLogger(StudentService.class);
 
 	@SuppressWarnings("deprecation")
 	public String loadStudentsFromXml(String adminId, InputStream input) {
@@ -48,13 +51,16 @@ public class StudentService {
 			if (rows.hasNext()) {
 				rows.next();
 			} else {
+				logger.warn("添加失败，excel文档为空");
 				return "添加失败，excel文档为空";
 			}
 
 			List<Student> studentList = new ArrayList<Student>();
 			DecimalFormat df = new DecimalFormat("0");
+			int rowNum = 0;
 			while (rows.hasNext()) {
 				Row row = rows.next();
+				rowNum++;
 				Iterator<Cell> cells = row.cellIterator();
 				Student student = new Student();
 				while (cells.hasNext()) {
@@ -67,18 +73,21 @@ public class StudentService {
 						if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
 							student.setStudentName(cell.getStringCellValue());
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，考生姓名不是字符串");
 							return "添加失败，考生姓名不是字符串";
 						}
 					} else if (cellNo == 1) {
 						if (cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
 							student.setStudentNo(Integer.parseInt(df.format(cell.getNumericCellValue())));
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，考生学号不是数字");
 							return "添加失败，考生学号不是数字";
 						}
 					} else if (cellNo == 2) {
 						if (cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
 							student.setTesterNo(Long.parseLong(df.format(cell.getNumericCellValue())));
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，考生考号不是数字");
 							return "添加失败，考生考号不是数字";
 						}
 					} else if (cellNo == 3) {
@@ -88,21 +97,25 @@ public class StudentService {
 							} else if ("女".equals(cell.getStringCellValue())) {
 								student.setGender(2);
 							} else {
+								logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，性别必须是男或者女");
 								return "添加失败，性别必须是男或者女";
 							}
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，性别不是字符串");
 							return "添加失败，性别不是字符串";
 						}
 					} else if (cellNo == 4) {
 						if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
 							student.setSchoolName(cell.getStringCellValue());
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，学校名称不是字符串");
 							return "添加失败，学校名称不是字符串";
 						}
 					} else if (cellNo == 5) {
 						if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
 							student.setClassName(cell.getStringCellValue());
 						} else {
+							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，班级名称不是字符串");
 							return "添加失败，班级不是字符串";
 						}
 					} else {
@@ -116,11 +129,33 @@ public class StudentService {
 			return "添加成功";
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
-			return "文件格式错误";
+			logger.error("添加学生失败", ioe);
+			return "添加失败，文件格式错误";
 		} catch (Exception e) {
+			logger.error("添加学生失败", e);
 			e.printStackTrace();
-			return "数据库错误";
+			return "添加失败，数据库错误";
 		}
+	}
+	
+	public boolean deleteStudents(String adminId, List<Student> studentList) {
+		if(CommonUtil.isEmpty(studentList)) {
+			return true;
+		}
+		
+		Iterator<Student> iter = studentList.iterator();
+		while (iter.hasNext()) {
+			Student student = iter.next();
+			if (student == null || student.getAdminId() == null || !student.getAdminId().equals(adminId)) {
+				iter.remove();
+			}else {
+				List<Record> testResultList = studentDao.getTestRecordByStudent(adminId, student.getTesterNo(), null, null);
+				if(!CommonUtil.isEmpty(testResultList)) {
+					studentDao.deleteTestResult(testResultList);
+				}
+			}
+		}
+		return studentDao.deleteStudents(studentList);
 	}
 
 	public List<String> getSchoolNameListByAdminId(String adminId) {
@@ -131,8 +166,8 @@ public class StudentService {
 		return studentDao.getClassNameListBySchool(adminId, schoolName);
 	}
 
-	public List<Student> getStudentListByAdminId(String adminId) {
-		return studentDao.getStudentListByAdminId(adminId);
+	public List<Student> getStudentList(String adminId, String schoolName, String className, Integer gender) {
+		return studentDao.getStudentList(adminId, schoolName, className, gender);
 	}
 
 	public Student getStudentByTesterNo(String adminId, long testerNo) {
@@ -154,6 +189,7 @@ public class StudentService {
 				continue;
 			}
 			testResult.setItemName(item.getItemName());
+			testResult.setUnit(item.getUnit());
 			testResult.setTestTime(record.getCreatedAt());
 			testResult.setResult(record.getResult());
 			Test test = testDao.getTestItemByItemId(student.getAdminId(), record.getItemId());

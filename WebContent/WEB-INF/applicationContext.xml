@@ -80,7 +80,7 @@
     
     <bean id="loginInterceptor" class="com.IotCloud.util.LoginRequiredInterceptor"></bean>
     <aop:config>
-        <aop:pointcut expression="execution(* com.IotCloud.service.*.*(..) )" id="loginPoint"/>
+        <aop:pointcut expression="execution(* com.IotCloud.controller.*.*(..) )" id="loginPoint"/>
         <aop:advisor pointcut-ref = "loginPoint" advice-ref="loginInterceptor"/>
     </aop:config>
 </beans>  

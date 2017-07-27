@@ -99,11 +99,7 @@ public class AdminDaoImpl implements AdminDao{
 
 	@Override
 	public boolean deleteAdmins(List<Admin> adminList) {
-		if(!CommonUtil.isEmpty(adminList)) {
-			baseDao.batchDelete(adminList);
-			return true;
-		}else {
-			return false;
-		}
+		baseDao.batchDelete(adminList);
+		return true;
 	}
 }
