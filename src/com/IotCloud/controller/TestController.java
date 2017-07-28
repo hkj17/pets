@@ -1,6 +1,7 @@
 package com.IotCloud.controller;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,24 +28,19 @@ import com.IotCloud.model.Item;
 import com.IotCloud.model.Test;
 import com.IotCloud.service.TestService;
 import com.IotCloud.util.CommonUtil;
-import com.IotCloud.util.ResponseFilter;
 
 @RestController
 public class TestController {
 
 	@Autowired
 	TestService testService;
-	
+
 	private static Logger logger = Logger.getLogger(TestController.class);
 
-	@RequestMapping(value = "/getItemList", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/getItemList", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getItemList(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
-//		Map<String, Object> res = new HashMap<String, Object>();
+		Map<String, Object> res = new HashMap<String, Object>();
 		try {
 			List<Item> itemList = testService.getItemList();
 			res.put(ParameterKeys.STATE, 0);
@@ -58,14 +54,10 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/getUnaddedItemList", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/getUnaddedItemList", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getUnaddedItemList(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
-
+		Map<String, Object> res = new HashMap<String, Object>();
 		try {
 			List<Item> unaddedItemList = testService.getUnaddedItemList(CommonUtil.getSessionUser(request));
 			res.put(ParameterKeys.STATE, 0);
@@ -79,13 +71,11 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/addItem", method = RequestMethod.POST)
+	@RequestMapping(value = "/superadmin/addItem", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> addItem(HttpServletRequest request, @RequestParam(value = "itemName") String itemName) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+	public Map<String, Object> addItem(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.ITEM_NAME) String itemName) {
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			boolean state = testService.addItem(itemName);
@@ -99,15 +89,12 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/addTestItem", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/addTestItem", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> addTestItem(HttpServletRequest request,
 			@RequestParam(value = ParameterKeys.ITEM_ID) String itemId,
 			@RequestParam(value = ParameterKeys.TYPE) int type) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			int state = testService.addTestItem(CommonUtil.getSessionUser(request), itemId, type);
@@ -142,13 +129,11 @@ public class TestController {
 	// }
 	// }
 
-	@RequestMapping(value = "/batchDeleteTestItem", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/batchDeleteTestItem", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> batchDeleteTestItem(HttpServletRequest request, @RequestBody List<Test> testList) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
+
 		try {
 			boolean state = testService.batchDeleteTestItem(CommonUtil.getSessionUser(request), testList);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
@@ -161,14 +146,11 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/getTestItemList", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/getTestItemList", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getTestItemList(HttpServletRequest request,
-			@RequestParam(value = "type", required = false) Integer type) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.TYPE, required = false) Integer type) {
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			List<Test> itemList = testService.getTestItemList(CommonUtil.getSessionUser(request), type);
@@ -183,15 +165,12 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/editTestType", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/editTestType", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> editTestType(HttpServletRequest request,
 			@RequestParam(value = ParameterKeys.ITEM_ID) String itemId,
 			@RequestParam(value = ParameterKeys.TYPE) int type) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			boolean state = testService.editTestType(CommonUtil.getSessionUser(request), itemId, type);
@@ -205,13 +184,10 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/loadEvaluation", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/loadEvaluation", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> loadEvaluation(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
@@ -222,25 +198,24 @@ public class TestController {
 			InputStream inputStream = cf.getInputStream();
 			String message = testService.loadEvalFromXml(CommonUtil.getSessionUser(request), inputStream);
 			res.put(ParameterKeys.STATE, 0);
-			res.put("message", message);
+			res.put(ParameterKeys.MESSAGE, message);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("批量导入评分标准异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put("message", "参数格式错误");
+			res.put(ParameterKeys.MESSAGE, "参数格式错误");
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/clearEvaluation", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/clearEvaluation", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> clearEvaluation(HttpServletRequest request,
-			@RequestParam(value = "itemName") String itemName, @RequestParam(value = ParameterKeys.TYPE) int type) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.ITEM_NAME) String itemName,
+			@RequestParam(value = ParameterKeys.TYPE) int type) {
+		Map<String, Object> res = new HashMap<String, Object>();
+
 		try {
 			boolean state = testService.clearEvaluation(CommonUtil.getSessionUser(request), itemName, type);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
@@ -253,31 +228,28 @@ public class TestController {
 		}
 	}
 
-	@RequestMapping(value = "/getEvaluationList/{testId}/type/{type}", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/getEvaluationList/{testId}/type/{type}", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getEvaluationList(HttpServletRequest request,
 			@PathVariable(ParameterKeys.TEST_ID) String testId, @PathVariable(ParameterKeys.TYPE) int type) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			Test test = testService.getTestById(testId);
-			if(test==null) {
-				//没有该考试项目
+			if (test == null) {
+				// 没有该考试项目
 				res.put(ParameterKeys.STATE, 11);
 				return res;
 			}
-			
+
 			List<Evaluation> evalList = testService.getEvaluationList(CommonUtil.getSessionUser(request), test, type);
 			// 考试项目不属于该账户
 			if (evalList == null) {
 				res.put(ParameterKeys.STATE, 12);
 				return res;
 			}
-			
-			String unit =testService.getUnitByTestItem(test);
+
+			String unit = testService.getUnitByTestItem(test);
 			res.put(ParameterKeys.STATE, 0);
 			res.put("evalList", evalList);
 			res.put("unit", unit);
@@ -290,8 +262,8 @@ public class TestController {
 		}
 	}
 
-//	@RequestMapping(value = "/loadView")
-//	public String loadView() {
-//		return "loadTest";
-//	}
+	// @RequestMapping(value = "/loadView")
+	// public String loadView() {
+	// return "loadTest";
+	// }
 }

@@ -46,6 +46,11 @@ public interface AdminDao {
 	public int updatePassword(String userName, String oldPasswd, String newPasswd);
 	
 	/**
+	 * 更新管理员基本信息
+	 */
+	public boolean updateAdminInfo(String adminId, String orgName, String areaCode);
+	
+	/**
 	 * 重置管理员密码
 	 */
 	public int resetPassword(String userName);

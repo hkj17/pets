@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.IotCloud.model.Admin;
 import com.IotCloud.service.AdminService;
 import com.IotCloud.util.CommonUtil;
-import com.IotCloud.util.ResponseFilter;
 import com.IotCloud.constant.ParameterKeys;
 
 @RestController
@@ -26,7 +25,7 @@ public class AdminController {
 
 	@Autowired
 	AdminService adminService;
-	
+
 	private static Logger logger = Logger.getLogger(AdminController.class);
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -47,27 +46,25 @@ public class AdminController {
 		}
 		res.put(ParameterKeys.STATE, 0);
 		res.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
-		res.put("orgName", admin.getOrgName());
+		res.put(ParameterKeys.ORG_NAME, admin.getOrgName());
 		res.put(ParameterKeys.AUTHORITY, admin.getAuthority());
 		return res;
 	}
 
-//	@RequestMapping("/")
-//	public String loginView() {
-//		return "login";
-//	}
+	// @RequestMapping("/")
+	// public String loginView() {
+	// return "login";
+	// }
 
-	@RequestMapping(value = "/addAdmin", method = RequestMethod.POST)
+	@RequestMapping(value = "/root/addAdmin", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> addAdmin(HttpServletRequest request,
 			@RequestParam(value = ParameterKeys.USER) String userName,
 			@RequestParam(value = ParameterKeys.PASSWORD) String password,
 			@RequestParam(value = ParameterKeys.AUTHORITY) int authority,
-			@RequestParam(value = "orgName") String orgName, @RequestParam(value = "areaCode") String areaCode) {
-		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.ORG_NAME) String orgName,
+			@RequestParam(value = ParameterKeys.AREA_CODE, required = false) String areaCode) {
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			boolean state = adminService.insertAdmin(CommonUtil.getSessionUser(request), userName, password, authority,
@@ -102,13 +99,10 @@ public class AdminController {
 	// }
 	// }
 
-	@RequestMapping(value = "/batchDeleteAdmin", method = RequestMethod.POST)
+	@RequestMapping(value = "/root/batchDeleteAdmin", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> batchDeleteAdmin(HttpServletRequest request, @RequestBody List<Admin> adminList) {
-		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			boolean state = adminService.batchDeleteAdmin(adminList);
@@ -122,13 +116,10 @@ public class AdminController {
 		}
 	}
 
-	@RequestMapping(value = "/getAdminList", method = RequestMethod.GET)
+	@RequestMapping(value = "/root/getAdminList", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getAdminList(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			List<Admin> adminList = adminService.getAdminList(CommonUtil.getSessionUser(request));
@@ -143,15 +134,12 @@ public class AdminController {
 		}
 	}
 
-	@RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/updatePassword", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> updatePassword(HttpServletRequest request,
 			@RequestParam(value = ParameterKeys.PASSWORD) String password,
 			@RequestParam(value = "newPasswd") String newPasswd) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			int state = adminService.updatePassword(CommonUtil.getSessionUser(request), password, newPasswd);
@@ -164,15 +152,30 @@ public class AdminController {
 			return res;
 		}
 	}
+	
+	@RequestMapping(value = "/admin/updateAdminInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> updateAdminInfo(HttpServletRequest request,
+			@RequestParam(value = ParameterKeys.ORG_NAME, required = false) String orgName,
+			@RequestParam(value = ParameterKeys.AREA_CODE, required = false) String areaCode){
+		Map<String, Object> res = new HashMap<String, Object>();
+		try {
+			boolean state = adminService.updateAdminInfo(CommonUtil.getSessionUser(request), orgName, areaCode);
+			res.put(ParameterKeys.STATE, state ? 0 : 1);
+			return res;
+		}catch (Exception e) {
+			e.printStackTrace();
+			logger.error("更新管理员基本信息异常", e);
+			res.put(ParameterKeys.STATE, 1);
+			return res;
+		}
+	}
 
-	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+	@RequestMapping(value = "/root/resetPassword", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> resetPassword(HttpServletRequest request,
 			@RequestParam(value = ParameterKeys.USER) String userName) {
-		Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			int state = adminService.resetPassword(userName);
@@ -185,5 +188,11 @@ public class AdminController {
 			return res;
 		}
 
+	}
+	
+	@RequestMapping(value = "/logout", method = RequestMethod.POST)
+	@ResponseBody
+	public void logout(HttpServletRequest request) {
+		request.getSession().invalidate();
 	}
 }

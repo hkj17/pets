@@ -1,21 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans  
-       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-	   http://www.springframework.org/schema/context 
-	   http://www.springframework.org/schema/context/spring-context-4.0.xsd
-	   http://www.springframework.org/schema/aop
-	   http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
-	   http://www.springframework.org/schema/tx
-	   http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-        ">
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:tx="http://www.springframework.org/schema/tx" 
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
 	<context:annotation-config />
 	<context:component-scan base-package="com.IotCloud"
-		annotation-config="true" />
-
-
+		annotation-config="true" /> 
+ 
+	<!-- <bean id = "loginInterceptor" class="com.IotCloud.util.LoginRequiredInterceptor"></bean> -->
+	
+	 <mvc:interceptors>  
+        <mvc:interceptor>  
+            <mvc:mapping path="/admin/**" />
+            <bean class="com.IotCloud.util.LoginRequiredInterceptor" />  
+        </mvc:interceptor> 
+        <mvc:interceptor>
+            <mvc:mapping path="/root/**" />
+            <bean class="com.IotCloud.util.RootPrivilInterceptor" />  
+        </mvc:interceptor>  
+        <mvc:interceptor>
+            <mvc:mapping path="/superadmin/**" />
+            <bean class="com.IotCloud.util.SuperAdminInterceptor" />  
+        </mvc:interceptor>
+    </mvc:interceptors>
+	
+	<!-- 注解请求映射  -->
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">        
+               
+    </bean> 
+         
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="messageConverters">  
+            <list>   
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>  
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter">  
+                    <property name="supportedMediaTypes">  
+                        <list>  
+                            <value>text/plain; charset=UTF-8</value>
+                            <value>application/json;charset=UTF-8</value>    
+                            <value>text/html;charset=UTF-8</value>    
+                        </list>  
+                    </property>  
+                </bean>  
+            </list>  
+        </property>   
+    </bean>  
+    <bean id="byteArray_hmc" class="org.springframework.http.converter.ByteArrayHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="string_hmc" class="org.springframework.http.converter.StringHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="resource_hmc" class="org.springframework.http.converter.ResourceHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="source_hmc" class="org.springframework.http.converter.xml.SourceHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="xmlAwareForm_hmc" class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="jaxb2RootElement_hmc" class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" /><!-- 处理.. -->
+    <bean id="jackson_hmc" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" /><!-- 处理json-->
+    
     <!-- 配置数据源 -->  
     <context:property-placeholder location="/WEB-INF/config/hibernate.properties"/>  
       
@@ -49,6 +100,8 @@
         </property>  
     </bean>  
       
+    <mvc:annotation-driven />
+      
     <!-- 配置Hibernate 的事物管理器 -->  
     <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">  
         <property name="sessionFactory" ref="sessionFactory"></property>  
@@ -78,9 +131,9 @@
         </tx:attributes>
     </tx:advice>
     
-    <bean id="loginInterceptor" class="com.IotCloud.util.LoginRequiredInterceptor"></bean>
+    <!--  <bean id="loginInterceptor" class="com.IotCloud.util.LoginRequiredInterceptor"></bean> -->
     <aop:config>
         <aop:pointcut expression="execution(* com.IotCloud.controller.*.*(..) )" id="loginPoint"/>
-        <aop:advisor pointcut-ref = "loginPoint" advice-ref="loginInterceptor"/>
+        <!-- <aop:advisor pointcut-ref = "loginPoint" advice-ref="loginInterceptor"/> -->
     </aop:config>
 </beans>  

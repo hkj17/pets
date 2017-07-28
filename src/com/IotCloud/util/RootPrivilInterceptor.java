@@ -12,7 +12,7 @@ import com.IotCloud.constant.ParameterKeys;
 
 import net.sf.json.JSONObject;
 
-public class LoginRequiredInterceptor implements HandlerInterceptor{
+public class RootPrivilInterceptor implements HandlerInterceptor{
 
 	@Override
 	public void afterCompletion(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3)
@@ -31,7 +31,8 @@ public class LoginRequiredInterceptor implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object arg2) throws Exception {
 		String adminId = (String) request.getSession().getAttribute(ParameterKeys.ADMIN_ID);
-		if(CommonUtil.isNullOrEmpty(adminId)) {
+		Object auth = request.getSession().getAttribute(ParameterKeys.AUTHORITY);
+		if(CommonUtil.isNullOrEmpty(adminId) || auth == null || !auth.equals(0)) {
 			JSONObject json = new JSONObject();
 			json.put(ParameterKeys.STATE, 2);
 			PrintWriter pw = response.getWriter();
@@ -40,6 +41,5 @@ public class LoginRequiredInterceptor implements HandlerInterceptor{
 		}
 		return true;
 	}
-	
 
 }

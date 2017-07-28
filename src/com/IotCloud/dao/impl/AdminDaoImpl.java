@@ -84,6 +84,22 @@ public class AdminDaoImpl implements AdminDao{
 		baseDao.update(admin);
 		return 0;
 	}
+	
+	@Override
+	public boolean updateAdminInfo(String adminId, String orgName, String areaCode) {
+		Admin admin = getAdminById(adminId);
+		if(admin==null) {
+			return false;
+		}
+		if(!CommonUtil.isNullOrEmpty(orgName)) {
+			admin.setOrgName(orgName);
+		}
+		if(!CommonUtil.isNullOrEmpty(areaCode)) {
+			admin.setAreaCode(areaCode);
+		}
+		baseDao.update(admin);
+		return true;
+	}
 
 	@Override
 	public int resetPassword(String userName) {

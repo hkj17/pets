@@ -1,6 +1,7 @@
 package com.IotCloud.controller;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import com.IotCloud.data.TestResult;
 import com.IotCloud.model.Student;
 import com.IotCloud.service.StudentService;
 import com.IotCloud.util.CommonUtil;
-import com.IotCloud.util.ResponseFilter;
 
 @RestController
 public class StudentController {
@@ -36,13 +36,10 @@ public class StudentController {
 
 	private static Logger logger = Logger.getLogger(StudentController.class);
 
-	@RequestMapping(value = "/loadStudents", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/loadStudents", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> loadStudents(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
@@ -53,24 +50,22 @@ public class StudentController {
 			InputStream inputStream = cf.getInputStream();
 			String message = studentService.loadStudentsFromXml(CommonUtil.getSessionUser(request), inputStream);
 			res.put(ParameterKeys.STATE, 0);
-			res.put("message", message);
+			res.put(ParameterKeys.MESSAGE, message);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("导入学生信息异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put("message", "参数格式错误");
+			res.put(ParameterKeys.MESSAGE, "参数格式错误");
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/deleteStudents", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/deleteStudents", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> deleteStudents(HttpServletRequest request, @RequestBody List<Student> studentList) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
+
 		try {
 			boolean state = studentService.deleteStudents(CommonUtil.getSessionUser(request), studentList);
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
@@ -83,13 +78,10 @@ public class StudentController {
 		}
 	}
 
-	@RequestMapping(value = "/getSchoolList", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/getSchoolList", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getSchoolList(HttpServletRequest request) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			List<String> schoolList = studentService.getSchoolNameListByAdminId(CommonUtil.getSessionUser(request));
@@ -104,13 +96,11 @@ public class StudentController {
 		}
 	}
 
-	@RequestMapping(value = "/getClassList", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/getClassList", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> getClassList(HttpServletRequest request, @RequestParam("schoolName") String schoolName) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+	public Map<String, Object> getClassList(HttpServletRequest request,
+			@RequestParam(ParameterKeys.SCHOOL_NAME) String schoolName) {
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			List<String> classList = studentService.getClassNameListBySchool(CommonUtil.getSessionUser(request),
@@ -126,16 +116,13 @@ public class StudentController {
 		}
 	}
 
-	@RequestMapping(value = "/getStudentList", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/getStudentList", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getStudentList(HttpServletRequest request,
-			@RequestParam(value = "schoolName", required = false) String schoolName,
-			@RequestParam(value = "className", required = false) String className,
-			@RequestParam(value = "gender", required = false) Integer gender) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.SCHOOL_NAME, required = false) String schoolName,
+			@RequestParam(value = ParameterKeys.CLASS_NAME, required = false) String className,
+			@RequestParam(value = ParameterKeys.GENDER, required = false) Integer gender) {
+		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
 			List<Student> studentList = studentService.getStudentList(CommonUtil.getSessionUser(request), schoolName,
@@ -151,63 +138,60 @@ public class StudentController {
 		}
 	}
 
-	@RequestMapping(value = "/getIndvTestResult", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/getIndvTestResult", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getIndvTestResult(HttpServletRequest request,
 			@RequestParam(value = "testerNo") long testerNo,
-			@RequestParam(value = "startTime", required = false) String startTime,
-			@RequestParam(value = "endTime", required = false) String endTime) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.START_TIME, required = false) String startTime,
+			@RequestParam(value = ParameterKeys.END_TIME, required = false) String endTime) {
+		Map<String, Object> res = new HashMap<String, Object>();
+
 		try {
 			Student student = studentService.getStudentByTesterNo(CommonUtil.getSessionUser(request), testerNo);
 			if (student == null) {
 				res.put(ParameterKeys.STATE, 1);
-				res.put("message", "没有找到对应的学生");
+				res.put(ParameterKeys.MESSAGE, "没有找到对应的学生");
 				return res;
 			} else {
 				res.put("studentInfo", student);
 			}
 			List<TestResult> testResultList = studentService.getRecordListByStudent(student, startTime, endTime);
 			res.put("testResultList", testResultList);
-			res.put("message", "查询成功");
+			res.put(ParameterKeys.MESSAGE, "查询成功");
 			res.put(ParameterKeys.STATE, 0);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询学生个人考试成绩异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put("message", "出现异常");
+			res.put(ParameterKeys.MESSAGE, "出现异常");
 			return res;
 		}
 	}
 
-	@RequestMapping(value = "/getTestResultByItem", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/getTestResultByItem", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getTestResultByItem(HttpServletRequest request,
-			@RequestParam(value = "itemName") String itemName, @RequestParam(value = "gender") int gender,
-			@RequestParam(value = "schoolName", required = false) String schoolName,
-			@RequestParam(value = "className", required = false) String className,
-			@RequestParam(value = "startTime", required = false) String startTime,
-			@RequestParam(value = "endTime", required = false) String endTime) {
-		Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-		if (res.containsKey(ParameterKeys.STATE)) {
-			return res;
-		}
+			@RequestParam(value = ParameterKeys.ITEM_NAME) String itemName,
+			@RequestParam(value = ParameterKeys.GENDER) int gender,
+			@RequestParam(value = ParameterKeys.SCHOOL_NAME, required = false) String schoolName,
+			@RequestParam(value = ParameterKeys.CLASS_NAME, required = false) String className,
+			@RequestParam(value = ParameterKeys.START_TIME, required = false) String startTime,
+			@RequestParam(value = ParameterKeys.END_TIME, required = false) String endTime) {
+		Map<String, Object> res = new HashMap<String, Object>();
+
 		try {
 			List<StudentTestResult> testResultList = studentService.getTestResultByItem(
 					CommonUtil.getSessionUser(request), schoolName, className, gender, itemName, startTime, endTime);
 			res.put("testResultList", testResultList);
-			res.put("message", "查询成功");
+			res.put(ParameterKeys.MESSAGE, "查询成功");
 			res.put(ParameterKeys.STATE, 0);
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询单项所有学生考试成绩异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put("message", "出现异常");
+			res.put(ParameterKeys.MESSAGE, "出现异常");
 			return res;
 		}
 	}
