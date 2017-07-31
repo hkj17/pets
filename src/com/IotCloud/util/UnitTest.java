@@ -17,5 +17,13 @@ public class UnitTest {
         System.out.println(new DecimalFormat("#").format(pi)); // 3
         // 以百分比方式计数，并取两位小数
         System.out.println(new DecimalFormat("#.##%").format(pi)); // 314.16%
-    }  
+        
+        StringBuilder sb = new StringBuilder("keji");
+        UnitTest.changeString(sb);
+        System.out.println(sb.toString());
+    } 
+    
+    public static void changeString(StringBuilder s) {
+    	s.append(" has changed");
+    }
 }  

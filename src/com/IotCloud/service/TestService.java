@@ -2,17 +2,10 @@ package com.IotCloud.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -21,6 +14,8 @@ import com.IotCloud.dao.TestDao;
 import com.IotCloud.model.Evaluation;
 import com.IotCloud.model.Item;
 import com.IotCloud.model.Test;
+import com.IotCloud.poi.EvalXmlReader;
+import com.IotCloud.poi.PoiListRecord;
 import com.IotCloud.util.CommonUtil;
 
 @Component("testService")
@@ -53,10 +48,6 @@ public class TestService {
 		return testDao.addTestItem(adminId, itemId, type);
 	}
 
-	// public boolean deleteTestItem(String adminId, String itemId) {
-	// return testDao.deleteTestItem(adminId, itemId);
-	// }
-
 	public boolean batchDeleteTestItem(String adminId, List<Test> testList) {
 		if (CommonUtil.isEmpty(testList)) {
 			return true;
@@ -84,113 +75,36 @@ public class TestService {
 		return testDao.editTestType(adminId, itemId, type);
 	}
 
-	@SuppressWarnings("deprecation")
 	public String loadEvalFromXml(String adminId, InputStream input) {
+		EvalXmlReader reader = new EvalXmlReader();
 		try {
-			Workbook wb = new HSSFWorkbook(input);
-			Test test = new Test();
-			Sheet sheet = wb.getSheetAt(0);
-			Iterator<Row> rows = sheet.rowIterator();
-			if (rows.hasNext()) {
-				rows.next();
-			} else {
-				logger.warn("添加失败，excel文档为空");
-				return "添加失败，excel文档为空";
-			}
-
-			List<Evaluation> evalList = new ArrayList<Evaluation>();
-			int rowNum = 0;
-			while (rows.hasNext()) {
-				Row row = rows.next();
-				rowNum++;
-				Iterator<Cell> cells = row.cellIterator();
-				Evaluation eval = new Evaluation();
-				while (cells.hasNext()) {
-					Cell cell = cells.next();
-					int cellNo = cell.getColumnIndex();
-					eval.setEvalId(CommonUtil.generateRandomUUID());
-					if (cellNo == 0) {
-						if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
-							String itemName = cell.getStringCellValue();
-							if (test.getItem() == null || !test.getItem().getItemName().equals(itemName)) {
-								test = testDao.getTestItemByName(adminId, itemName);
-								if (test == null) {
-									return "添加失败，没有考试项目" + itemName;
-								}
-							}
-							eval.setTestId(test.getTestId());
-						} else if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
-							eval.setTestId(test.getTestId());
-						} else {
-							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，项目名称不是字符串");
-							return "添加失败，项目名称不是字符串";
+			PoiListRecord<Evaluation> recordList = reader.loadFromXml(adminId, input);
+			List<Evaluation> evalList = recordList.getRecordList();
+			if (evalList != null) {
+				Test test = new Test();
+				for (Evaluation eval : evalList) {
+					// get overridden itemName
+					String itemName = eval.getTestId();
+					if (test.getItem() == null || !test.getItem().getItemName().equals(itemName)) {
+						test = testDao.getTestItemByName(adminId, itemName);
+						if (test == null) {
+							return "添加失败，没有考试项目" + itemName;
 						}
-					} else if (cellNo == 1) {
-						if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
-							int currType = 0;
-							if ("男".equals(cell.getStringCellValue())) {
-								currType = 1;
-								eval.setType(currType);
-							} else if ("女".equals(cell.getStringCellValue())) {
-								currType = 2;
-								eval.setType(currType);
-							} else {
-								logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，性别必须是男或者女");
-								return "添加失败，性别必须是男或者女";
-							}
-
-							if ((currType & test.getType()) == 0) {
-								return "添加失败，" + test.getItem().getItemName() + "没有" + cell.getStringCellValue()
-										+ "生考项";
-							}
-						} else {
-							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，性别不是字符串");
-							return "添加失败，性别不是字符串";
-						}
-					} else if (cellNo == 2) {
-						if (cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
-							eval.setLowerBound(cell.getNumericCellValue());
-						} else {
-							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，最低成绩不是数字");
-							return "添加失败，最低成绩不是数字";
-						}
-					} else if (cellNo == 3) {
-						if (cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
-							eval.setUpperBound(cell.getNumericCellValue());
-						} else {
-							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，最高成绩不是数字");
-							return "添加失败，最高成绩不是数字";
-						}
-						// } else if (cellNo == 4) {
-						// if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
-						// eval.setUnit(cell.getStringCellValue());
-						// } else {
-						// return "添加失败，单位不是字符串";
-						// }
-					} else if (cellNo == 4) {
-						if (cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
-							eval.setPoint(cell.getNumericCellValue());
-						} else {
-							logger.error("第" + rowNum + "行, 第" + (cellNo + 1) + "列出错， 添加失败，分值不是数字");
-							return "添加失败，分值不是数字";
-						}
-					} else {
-						break;
 					}
 
+					if ((eval.getType() & test.getType()) == 0) {
+						return "添加失败，" + test.getItem().getItemName() + "没有" + (eval.getType() == 1 ? "男" : "女")
+								+ "生考项";
+					}
+					eval.setTestId(test.getTestId());
 				}
-				evalList.add(eval);
+				testDao.addEvaluations(recordList.getRecordList());
 			}
-			testDao.addEvaluations(evalList);
-			return "添加成功";
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("评分标准添加失败", e);
-			return "添加失败，文件格式错误";
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("评分标准添加失败", e);
-			return "添加失败，数据库错误";
+			return recordList.getMessage();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			logger.error("IO异常", ioe);
+			return "添加失败，IO异常";
 		}
 	}
 
@@ -203,7 +117,6 @@ public class TestService {
 	}
 
 	public List<Evaluation> getEvaluationList(String adminId, Test test, int type) {
-		// Test test = testDao.getTestById(testId);
 		// 如果管理员没有这个测试项目，则不能查看测试项目的评分标准
 		if (test.getAdminId() == null || !test.getAdminId().equals(adminId)) {
 			return null;

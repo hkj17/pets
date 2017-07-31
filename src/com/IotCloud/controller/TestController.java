@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -108,27 +109,6 @@ public class TestController {
 		}
 	}
 
-	// @RequestMapping(value = "/deleteTestItem", method = RequestMethod.POST)
-	// @ResponseBody
-	// public Map<String, Object> deleteTestItem(HttpServletRequest request,
-	// @RequestParam(value = ParameterKeys.ITEM_ID) String itemId) {
-	// Map<String, Object> res = ResponseFilter.loginRequiredFilter(request);
-	// if (res.containsKey(ParameterKeys.STATE)) {
-	// return res;
-	// }
-	//
-	// try {
-	// boolean state =
-	// testService.deleteTestItem(CommonUtil.getSessionUser(request), itemId);
-	// res.put(ParameterKeys.STATE, state ? 0 : 1);
-	// return res;
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// res.put(ParameterKeys.STATE, 1);
-	// return res;
-	// }
-	// }
-
 	@RequestMapping(value = "/admin/batchDeleteTestItem", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> batchDeleteTestItem(HttpServletRequest request, @RequestBody List<Test> testList) {
@@ -197,14 +177,24 @@ public class TestController {
 			CommonsMultipartFile cf = (CommonsMultipartFile) fileM;
 			InputStream inputStream = cf.getInputStream();
 			String message = testService.loadEvalFromXml(CommonUtil.getSessionUser(request), inputStream);
-			res.put(ParameterKeys.STATE, 0);
+			if("添加成功".equals(message)) {
+				res.put(ParameterKeys.STATE, 0);
+			}else {
+				res.put(ParameterKeys.STATE, 1);
+			}
 			res.put(ParameterKeys.MESSAGE, message);
+			return res;
+		} catch(ConstraintViolationException cve) {
+			cve.printStackTrace();
+			logger.error("重复添加评分标准", cve);
+			res.put(ParameterKeys.STATE, 1);
+			res.put(ParameterKeys.MESSAGE, "添加评分标准失败，重复添加，请删除原有的评分标准");
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("批量导入评分标准异常", e);
+			logger.error("导入评分标准异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put(ParameterKeys.MESSAGE, "参数格式错误");
+			res.put(ParameterKeys.MESSAGE, "添加评分标准失败，参数格式错误");
 			return res;
 		}
 	}
@@ -261,9 +251,4 @@ public class TestController {
 			return res;
 		}
 	}
-
-	// @RequestMapping(value = "/loadView")
-	// public String loadView() {
-	// return "loadTest";
-	// }
 }

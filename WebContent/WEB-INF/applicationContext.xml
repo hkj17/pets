@@ -26,15 +26,15 @@
 	 <mvc:interceptors>  
         <mvc:interceptor>  
             <mvc:mapping path="/admin/**" />
-            <bean class="com.IotCloud.util.LoginRequiredInterceptor" />  
+            <bean class="com.IotCloud.interceptor.LoginRequiredInterceptor" />  
         </mvc:interceptor> 
         <mvc:interceptor>
             <mvc:mapping path="/root/**" />
-            <bean class="com.IotCloud.util.RootPrivilInterceptor" />  
+            <bean class="com.IotCloud.interceptor.RootPrivilInterceptor" />  
         </mvc:interceptor>  
         <mvc:interceptor>
             <mvc:mapping path="/superadmin/**" />
-            <bean class="com.IotCloud.util.SuperAdminInterceptor" />  
+            <bean class="com.IotCloud.interceptor.SuperAdminInterceptor" />  
         </mvc:interceptor>
     </mvc:interceptors>
 	

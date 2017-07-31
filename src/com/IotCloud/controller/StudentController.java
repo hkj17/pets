@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,14 +50,24 @@ public class StudentController {
 			CommonsMultipartFile cf = (CommonsMultipartFile) fileM;
 			InputStream inputStream = cf.getInputStream();
 			String message = studentService.loadStudentsFromXml(CommonUtil.getSessionUser(request), inputStream);
-			res.put(ParameterKeys.STATE, 0);
+			if("添加成功".equals(message)) {
+				res.put(ParameterKeys.STATE, 0);
+			}else {
+				res.put(ParameterKeys.STATE, 1);
+			}
 			res.put(ParameterKeys.MESSAGE, message);
 			return res;
-		} catch (Exception e) {
+		} catch(ConstraintViolationException cve) {
+			cve.printStackTrace();
+			logger.error("重复添加学生", cve);
+			res.put(ParameterKeys.STATE, 1);
+			res.put(ParameterKeys.MESSAGE, "添加学生失败，重复添加，请删除原有的学生");
+			return res;
+		}catch(Exception e) {
 			e.printStackTrace();
 			logger.error("导入学生信息异常", e);
 			res.put(ParameterKeys.STATE, 1);
-			res.put(ParameterKeys.MESSAGE, "参数格式错误");
+			res.put(ParameterKeys.MESSAGE, "添加学生失败，参数格式错误");
 			return res;
 		}
 	}

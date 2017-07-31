@@ -47,6 +47,7 @@ public class AdminController {
 		res.put(ParameterKeys.STATE, 0);
 		res.put(ParameterKeys.ADMIN_ID, admin.getAdminId());
 		res.put(ParameterKeys.ORG_NAME, admin.getOrgName());
+		res.put(ParameterKeys.AREA_CODE, admin.getAreaCode());
 		res.put(ParameterKeys.AUTHORITY, admin.getAuthority());
 		return res;
 	}

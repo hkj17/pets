@@ -32,7 +32,7 @@ public interface StudentDao {
 	/**
 	 * 删除学生的考试信息
 	 */
-	public boolean deleteTestResult(List<Record> recordList);
+	public boolean deleteTestRecord(List<Record> recordList);
 	
 	/**
 	 * 返回一个学校下面所有的班级名称

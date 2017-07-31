@@ -204,7 +204,7 @@ public class StudentDaoImpl implements StudentDao {
 	}
 
 	@Override
-	public boolean deleteTestResult(List<Record> recordList) {
+	public boolean deleteTestRecord(List<Record> recordList) {
 		recordBaseDao.batchDelete(recordList);
 		return true;
 	}

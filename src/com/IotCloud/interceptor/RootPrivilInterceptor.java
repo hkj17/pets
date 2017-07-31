@@ -1,4 +1,4 @@
-package com.IotCloud.util;
+package com.IotCloud.interceptor;
 
 import java.io.PrintWriter;
 
@@ -9,6 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.IotCloud.constant.ParameterKeys;
+import com.IotCloud.util.CommonUtil;
 
 import net.sf.json.JSONObject;
 
