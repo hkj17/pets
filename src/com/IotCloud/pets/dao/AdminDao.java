@@ -53,5 +53,5 @@ public interface AdminDao {
 	/**
 	 * 重置管理员密码
 	 */
-	public int resetPassword(String userName);
+	public int resetPassword(String userName, String adminId);
 }

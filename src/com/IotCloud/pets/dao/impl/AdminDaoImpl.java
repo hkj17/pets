@@ -102,11 +102,15 @@ public class AdminDaoImpl implements AdminDao{
 	}
 
 	@Override
-	public int resetPassword(String userName) {
+	public int resetPassword(String userName, String adminId) {
 		Admin admin = getAdminByUserName(userName);
 		if(admin == null) {
 			//用户不存在
 			return 11;
+		}
+		if(!adminId.equals(admin.getCreatedBy())) {
+			//管理员和用户不匹配
+			return 12;
 		}
 		admin.setUserPasswd(PasswordUtil.generatePassword(DefaultValues.DEFAULT_PASSWD));
 		baseDao.update(admin);

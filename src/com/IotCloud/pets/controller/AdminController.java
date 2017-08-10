@@ -66,7 +66,12 @@ public class AdminController {
 			@RequestParam(value = ParameterKeys.ORG_NAME) String orgName,
 			@RequestParam(value = ParameterKeys.AREA_CODE, required = false) String areaCode) {
 		Map<String, Object> res = new HashMap<String, Object>();
-
+		int userAuthority = CommonUtil.getUserAuthority(request);
+		if(userAuthority >= authority) {
+			res.put(ParameterKeys.STATE, 2);
+			return res;
+		}
+		
 		try {
 			boolean state = adminService.insertAdmin(CommonUtil.getSessionUser(request), userName, password, authority,
 					orgName, areaCode);
@@ -80,33 +85,13 @@ public class AdminController {
 		}
 	}
 
-	// @RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
-	// @ResponseBody
-	// public Map<String, Object> deleteAdmin(HttpServletRequest request,
-	// @RequestParam(value = ParameterKeys.USER) String userName) {
-	// Map<String, Object> res = ResponseFilter.adminServiceFilter(request);
-	// if (res.containsKey(ParameterKeys.STATE)) {
-	// return res;
-	// }
-	//
-	// try {
-	// boolean state = adminService.deleteAdmin(userName);
-	// res.put(ParameterKeys.STATE, state ? 0 : 1);
-	// return res;
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// res.put(ParameterKeys.STATE, 1);
-	// return res;
-	// }
-	// }
-
 	@RequestMapping(value = "/root/batchDeleteAdmin", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> batchDeleteAdmin(HttpServletRequest request, @RequestBody List<Admin> adminList) {
 		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
-			boolean state = adminService.batchDeleteAdmin(adminList);
+			boolean state = adminService.batchDeleteAdmin(adminList, CommonUtil.getSessionUser(request));
 			res.put(ParameterKeys.STATE, state ? 0 : 1);
 			return res;
 		} catch (Exception e) {
@@ -179,7 +164,7 @@ public class AdminController {
 		Map<String, Object> res = new HashMap<String, Object>();
 
 		try {
-			int state = adminService.resetPassword(userName);
+			int state = adminService.resetPassword(userName, CommonUtil.getSessionUser(request));
 			res.put(ParameterKeys.STATE, state);
 			return res;
 		} catch (Exception e) {

@@ -42,15 +42,25 @@ public class AdminService {
 	// return adminDao.deleteAdmin(userName);
 	// }
 
-	public boolean batchDeleteAdmin(List<Admin> adminList) {
+	public boolean batchDeleteAdmin(List<Admin> adminList, String adminId) {
 		if (CommonUtil.isEmpty(adminList)) {
 			return true;
 		}
 		for(Admin admin : adminList) {
-			List<Test> testList = testService.getTestItemList(admin.getAdminId(), null);
-			testService.batchDeleteTestItem(admin.getAdminId(), testList);
-			List<Student> studentList = studentService.getStudentList(admin.getAdminId(), null, null, null);
-			studentService.deleteStudents(admin.getAdminId(), studentList);
+			if(!adminId.equals(admin.getCreatedBy())) {
+				continue;
+			}
+			
+			if(admin.getAuthority()>0) {
+				List<Test> testList = testService.getTestItemList(admin.getAdminId(), null);
+				testService.batchDeleteTestItem(admin.getAdminId(), testList);
+				List<Student> studentList = studentService.getStudentList(admin.getAdminId(), null, null, null);
+				studentService.deleteStudents(admin.getAdminId(), studentList);
+			}else{
+				List<Admin> listAdmin = adminDao.getAdminList(admin.getAdminId());
+				System.out.println(listAdmin.size());
+				batchDeleteAdmin(listAdmin, admin.getAdminId());
+			}
 		}
 		return adminDao.deleteAdmins(adminList);
 	}
@@ -80,8 +90,8 @@ public class AdminService {
 		return adminDao.getAdminList(adminId);
 	}
 
-	public int resetPassword(String userName) {
-		return adminDao.resetPassword(userName);
+	public int resetPassword(String userName, String adminId) {
+		return adminDao.resetPassword(userName, adminId);
 	}
 	
 	public boolean updateAdminInfo(String adminId, String orgName, String areaCode) {

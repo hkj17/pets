@@ -31,9 +31,9 @@ public class RootPrivilInterceptor implements HandlerInterceptor{
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object arg2) throws Exception {
-		String adminId = (String) request.getSession().getAttribute(ParameterKeys.ADMIN_ID);
-		Object auth = request.getSession().getAttribute(ParameterKeys.AUTHORITY);
-		if(CommonUtil.isNullOrEmpty(adminId) || auth == null || !auth.equals(0)) {
+		String adminId = CommonUtil.getSessionUser(request);
+		int auth = CommonUtil.getUserAuthority(request);
+		if(CommonUtil.isNullOrEmpty(adminId) || auth > 0) {
 			JSONObject json = new JSONObject();
 			json.put(ParameterKeys.STATE, 2);
 			PrintWriter pw = response.getWriter();

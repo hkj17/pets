@@ -23,4 +23,12 @@ public class CommonUtil {
     public static String getSessionUser(HttpServletRequest request) {
     	return (String) request.getSession().getAttribute(ParameterKeys.ADMIN_ID);
     }
+    
+	public static int getUserAuthority(HttpServletRequest request) {
+    	try {
+    		return (int) request.getSession().getAttribute(ParameterKeys.AUTHORITY);
+    	}catch(Exception e) {
+    		return Integer.MAX_VALUE;
+    	}
+    }
 }

@@ -31,7 +31,7 @@ public class LoginRequiredInterceptor implements HandlerInterceptor{
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object arg2) throws Exception {
-		String adminId = (String) request.getSession().getAttribute(ParameterKeys.ADMIN_ID);
+		String adminId = CommonUtil.getSessionUser(request);
 		if(CommonUtil.isNullOrEmpty(adminId)) {
 			JSONObject json = new JSONObject();
 			json.put(ParameterKeys.STATE, 2);
